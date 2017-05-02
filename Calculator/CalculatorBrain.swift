@@ -48,7 +48,6 @@ struct CalculatorBrain {
         case binaryOperation ((Double,Double)->Double, ((String,String) -> String)?)
         case equals
         case clear
-        case backspace
     }
     
     private var operations: Dictionary<String,Operation> =
@@ -70,7 +69,6 @@ struct CalculatorBrain {
             "Rand"  :   Operation.nullaryOperation({ Double(arc4random())/Double(UInt32.max) },"Rand()"),
             "="     :   Operation.equals,
             "С"     :   Operation.clear,
-            "⌫"    :   Operation.backspace
         ]
     
     private var pendingBinaryOperation: PendingBinaryOperation?
@@ -133,9 +131,7 @@ struct CalculatorBrain {
                 pendingBinaryOperation = nil
             case .equals:
                 performPendingBinaryOperation()
-            case .backspace:
-                break
-                
+                          
             }
         }
     }
