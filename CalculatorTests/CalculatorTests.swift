@@ -192,9 +192,12 @@ class CalculatorTests: XCTestCase {
         XCTAssertEqual(testBrain.result, 3.0) 
  
 
-        //g. 7 + 9 √ = будет показано “7 + √(9) =“ (10 на  display )
-        
-       
+        //g. 7 + 9 √ = будет показано “7 + √(9) =“ (10 на  display ) также проверяет корректность clear
+        testBrain.performOperation("C")
+        testBrain.setOperand(7)
+        testBrain.performOperation("+")
+        testBrain.setOperand(9)
+        testBrain.performOperation("√")
         testBrain.performOperation("=")
         XCTAssertEqual(testBrain.description, "7 + √(9)")
         XCTAssertFalse(testBrain.resultIsPending)
