@@ -68,7 +68,7 @@ struct CalculatorBrain {
             "÷"     :   Operation.binaryOperation(/,nil),
             "Rand"  :   Operation.nullaryOperation({ Double(arc4random())/Double(UInt32.max) },"Rand()"),
             "="     :   Operation.equals,
-            "С"     :   Operation.clear,
+            "C"     :   Operation.clear
         ]
     
     private var pendingBinaryOperation: PendingBinaryOperation?
@@ -128,6 +128,8 @@ struct CalculatorBrain {
             case .clear:
                 accumulator = nil
                 descriptionAccumulator = " "
+                print("pendingBinaryOperation?.descriptionOperand: \(String(describing: pendingBinaryOperation?.descriptionOperand))")
+                pendingBinaryOperation?.descriptionOperand = " "
                 pendingBinaryOperation = nil
             case .equals:
                 performPendingBinaryOperation()
@@ -141,7 +143,7 @@ struct CalculatorBrain {
             accumulator = pendingBinaryOperation!.perform(with: accumulator!)
             
             descriptionAccumulator = pendingBinaryOperation!.performDescription(with: descriptionAccumulator!)
-            
+            print("descriptionAccumulator: \(String(describing: descriptionAccumulator))")
             pendingBinaryOperation = nil
         }
     }

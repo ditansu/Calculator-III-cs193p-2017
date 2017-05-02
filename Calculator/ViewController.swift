@@ -16,8 +16,19 @@ class ViewController: UIViewController {
     var userIsInTheMiddleOfTyping = false
     var floatIsInTheMiddleOfTyping  = false
     
+    private var brain = CalculatorBrain()
     let calcFormatter = CalculatorFormatter()
     
+    
+    var displayValue: Double {
+        get {
+            return calcFormatter.formatterStrToDbl(from: display.text!) ?? 0.0
+        }
+        set {
+            display.text = calcFormatter.string(from: NSNumber(value: newValue))
+        }
+    }
+
     
     @IBAction func touchDigit(_ sender: UIButton) {
         var digit = sender.currentTitle!
@@ -54,20 +65,7 @@ class ViewController: UIViewController {
         }
     }
     
-    
-    
-    var displayValue: Double {
-        get {
-            return calcFormatter.formatterStrToDbl(from: display.text!) ?? 0.0
-        }
-        set {
-            display.text = calcFormatter.string(from: NSNumber(value: newValue))
-        }
-    }
-    
-  
-    
-    private var brain = CalculatorBrain()
+   
     
     @IBAction func performOperation (_ sender: UIButton) {
         
