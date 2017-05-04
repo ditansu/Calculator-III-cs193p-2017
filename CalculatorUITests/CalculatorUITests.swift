@@ -107,43 +107,8 @@ class CalculatorUITests: XCTestCase {
     func testGeneral() {
         // Use recording to get started writing UI tests.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
-        /*
-         let app = XCUIApplication()
-         let calcFormatter = CalculatorFormatter()
-         
-         
-         let buttonDict = [
-         "0"     :   app.buttons["0"],
-         "1"     :   app.buttons["1"],
-         "2"     :   app.buttons["2"],
-         "3"     :   app.buttons["3"],
-         "4"     :   app.buttons["4"],
-         "5"     :   app.buttons["5"],
-         "6"     :   app.buttons["6"],
-         "7"     :   app.buttons["7"],
-         "8"     :   app.buttons["8"],
-         "9"     :   app.buttons["9"],
-         "π"     :   app.buttons["π"],
-         "cos"   :   app.buttons["cos"],
-         "sin"   :   app.buttons["sin"],
-         "e"     :   app.buttons["e"],
-         "ln"    :   app.buttons["ln"],
-         "√"     :   app.buttons["√"],
-         "x²"    :   app.buttons["x²"],
-         "x!"    :   app.buttons["x!"],
-         //"x⁻¹"   :   app.buttons["x⁻¹"],
-         "±"     :   app.buttons["±"],
-         "×"     :   app.buttons["×"],
-         "+"     :   app.buttons["+"],
-         "-"     :   app.buttons["-"],
-         "÷"     :   app.buttons["÷"],
-         "Rand"  :   app.buttons["Rand"],
-         "="     :   app.buttons["="],
-         "С"     :   app.buttons["С"],
-         "⌫"     :   app.buttons["⌫"],
-         "."     :   app.buttons["."]
-         ]
-         */
+        
+        
         
         // check algeba, input: 100*10/2+16*4 = "564" need follow to math operations right order, not realized
         
@@ -185,13 +150,18 @@ class CalculatorUITests: XCTestCase {
         }
         
         
-        // (111 111 111)² = 12345678987654321 (why I get "0" in the end???)
+        // (111 111 111)² = 12345678987654320
         
         buttonDict["x²"]?.tap()
         if let pendingResult = calcFormatter.string(from: NSNumber(value: 12345678987654320)) {
             XCTAssert(app.staticTexts[pendingResult].exists)
         }
         
+        // √12345678987654320 = 111111111
+        buttonDict["√"]?.tap()
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 111111111)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
         
         //cos(π) = -1
         buttonDict["π"]?.tap()
@@ -273,6 +243,114 @@ class CalculatorUITests: XCTestCase {
     
     func testBackspace() {
         
+        //simple backspace check
+        
+        buttonDict["C"]?.tap()
+        
+        buttonDict["9"]?.tap()
+        buttonDict["3"]?.tap()
+        buttonDict["4"]?.tap()
+        buttonDict["7"]?.tap()
+        buttonDict["8"]?.tap()
+        buttonDict["3"]?.tap()
+        buttonDict["4"]?.tap()
+       
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 9347834)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+        
+        buttonDict["⌫"]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 934783)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+
+        buttonDict["⌫"]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 93478)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+        
+        buttonDict["9"]?.tap()
+        buttonDict["9"]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 934783499)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+
+        buttonDict["⌫"]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 934789)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+        
+        // backspace in the middle operation
+        
+        buttonDict["+"]?.tap()
+        buttonDict["5"]?.tap()
+        buttonDict["5"]?.tap()
+        buttonDict["7"]?.tap()
+        buttonDict["2"]?.tap()
+        buttonDict["9"]?.tap()
+        buttonDict["0"]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 557290)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+
+        buttonDict["⌫"]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 55729)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+
+        buttonDict["⌫"]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 5572)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+        
+        buttonDict["3"]?.tap()
+        buttonDict["7"]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 557237)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+        
+        buttonDict["="]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 1492026)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+        
+        buttonDict["⌫"]?.tap()
+        buttonDict["⌫"]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 1492026)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+        
+        buttonDict["+"]?.tap()
+        buttonDict["2"]?.tap()
+        buttonDict["5"]?.tap()
+        buttonDict["6"]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 256)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+        
+        buttonDict["⌫"]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 25)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
+        
+        buttonDict["="]?.tap()
+        
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 1492051)) {
+            XCTAssert(app.staticTexts[pendingResult].exists)
+        }
     }
     
     func testDecimalPoint() {

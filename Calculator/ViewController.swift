@@ -98,15 +98,19 @@ class ViewController: UIViewController {
         }
         
         // delete the group separator together with gigit
-        let textCurrentlyInDisplay = display.text!
+        var textCurrentlyInDisplay = display.text!
         let index = textCurrentlyInDisplay.index(before: textCurrentlyInDisplay.endIndex)
        
         if String(textCurrentlyInDisplay[index]) == calcFormatter.groupingSeparator {
             display.text = String (display.text!.characters.dropLast())
         }
+      
+        // do backspace by dropLast method        
+        textCurrentlyInDisplay = display.text!
+        textCurrentlyInDisplay = String (textCurrentlyInDisplay.characters.dropLast())
+        let doubleCurrentTotal = calcFormatter.formatterStrToDbl(from: textCurrentlyInDisplay)  ?? 0.0
+        display!.text  = calcFormatter.string(from: NSNumber(value: doubleCurrentTotal))
         
-        // do backspace by dropLast method
-        display.text = String (display.text!.characters.dropLast())
         if display.text!.isEmpty {
             displayValue = 0
             userIsInTheMiddleOfTyping = false
