@@ -37,15 +37,17 @@ class CalculatorFormatter: NumberFormatter {
 }
 
 
+let calcFormatter = CalculatorFormatter()
+
 
 class CalculatorUITests: XCTestCase {
     
     
     let app = XCUIApplication()
     var buttonDict : [String : XCUIElement] = [:]
-    let calcFormatter = CalculatorFormatter()
+    //let calcFormatter = CalculatorFormatter()
     
-    let point = "."  //CAHNGE to calcFormatter.decimalSeparator !!!
+    let point =  calcFormatter.decimalSeparator ?? "."
     
     override func setUp() {
         super.setUp()
@@ -87,7 +89,7 @@ class CalculatorUITests: XCTestCase {
             "÷"     :   app.buttons["÷"],
             "Rand"  :   app.buttons["Rand"],
             "="     :   app.buttons["="],
-            "С"     :   app.buttons["С"],
+            "C"     :   app.buttons["C"],
             "⌫"     :   app.buttons["⌫"],
             point     :   app.buttons[point]
         ]
@@ -275,7 +277,7 @@ class CalculatorUITests: XCTestCase {
         buttonDict["9"]?.tap()
         buttonDict["9"]?.tap()
         
-        if let pendingResult = calcFormatter.string(from: NSNumber(value: 934783499)) {
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 9347899)) {
             XCTAssert(app.staticTexts[pendingResult].exists)
         }
 
@@ -404,6 +406,8 @@ class CalculatorUITests: XCTestCase {
         
         buttonDict["C"]?.tap()
         
+        XCTAssert(app.staticTexts["0"].exists)
+        
         buttonDict["9"]?.tap()
         buttonDict["3"]?.tap()
         buttonDict["4"]?.tap()
@@ -423,6 +427,8 @@ class CalculatorUITests: XCTestCase {
         //only allow 1 decimal point
         
         buttonDict["C"]?.tap()
+        
+        XCTAssert(app.staticTexts["0"].exists)
         
         buttonDict["9"]?.tap()
         buttonDict["3"]?.tap()
@@ -449,14 +455,14 @@ class CalculatorUITests: XCTestCase {
         buttonDict["C"]?.tap()
         
         buttonDict[point]?.tap()
-        XCTAssert(app.staticTexts[point].exists)
+        XCTAssert(app.staticTexts["0"+point].exists)
         buttonDict["3"]?.tap()
         XCTAssert(app.staticTexts["0"+point+"3"].exists)
         buttonDict["6"]?.tap()
         XCTAssert(app.staticTexts["0"+point+"36"].exists)
         buttonDict["+"]?.tap()
         buttonDict[point]?.tap() // IT IS VERY IMPORTANT TEST!!
-        XCTAssert(app.staticTexts[point].exists)
+        XCTAssert(app.staticTexts["0" + point].exists)
         buttonDict["7"]?.tap()
         XCTAssert(app.staticTexts["0"+point+"7"].exists)
         buttonDict["8"]?.tap()

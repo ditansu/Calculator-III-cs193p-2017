@@ -8,17 +8,25 @@
 
 import UIKit
 
+let calcFormatter = CalculatorFormatter()
+
 class ViewController: UIViewController {
     
     @IBOutlet weak var display: UILabel!
     @IBOutlet weak var history: UILabel!
+   
+    @IBOutlet weak var buttonPoint: UIButton! {
+        didSet {
+            buttonPoint.setTitle(decimalSeparator, for: UIControlState())
+        }
+    }
+    
     
     var userIsInTheMiddleOfTyping = false
     var floatIsInTheMiddleOfTyping  = false
     
     private var brain = CalculatorBrain()
-    let calcFormatter = CalculatorFormatter()
-    
+    let decimalSeparator = calcFormatter.decimalSeparator ?? "."
     
     var displayValue: Double {
         get {
@@ -29,12 +37,16 @@ class ViewController: UIViewController {
         }
     }
 
+
+    
     
     @IBAction func touchDigit(_ sender: UIButton) {
-        var digit = sender.currentTitle!
+        let digit = sender.currentTitle!
         
         // blocking second separater input
-        if digit == "." {
+        
+        
+        if digit == decimalSeparator {
             
             if floatIsInTheMiddleOfTyping {
                 return
@@ -42,7 +54,10 @@ class ViewController: UIViewController {
                 floatIsInTheMiddleOfTyping = true
             }
             
-            digit = calcFormatter.decimalSeparator
+            if  !userIsInTheMiddleOfTyping  {  //!brain.resultIsPending && 
+                display.text! = "0"
+            }
+            
             display.text! += digit
             userIsInTheMiddleOfTyping = true
             return
@@ -89,6 +104,7 @@ class ViewController: UIViewController {
         brain.performOperation("C")
         displayValue = 0
         history.text = " "
+        floatIsInTheMiddleOfTyping = false
     }
     
     @IBAction func backspace(_ sender: UIButton) {

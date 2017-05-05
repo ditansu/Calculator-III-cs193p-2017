@@ -128,7 +128,7 @@ struct CalculatorBrain {
             case .clear:
                 accumulator = nil
                 descriptionAccumulator = " "
-                print("pendingBinaryOperation?.descriptionOperand: \(String(describing: pendingBinaryOperation?.descriptionOperand))")
+                // print("pendingBinaryOperation?.descriptionOperand: \(String(describing: pendingBinaryOperation?.descriptionOperand))")
                 pendingBinaryOperation?.descriptionOperand = " "
                 pendingBinaryOperation = nil
             case .equals:
