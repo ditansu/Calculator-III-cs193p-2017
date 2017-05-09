@@ -8,38 +8,27 @@
 
 import Foundation
 
-func factorialCalc(digit : Double) -> Double {
-    var n = Int(digit)
-    var result = 1
-    
-    while n > 1 {
-        result *= n
-        n -= 1
-    }
-    return Double(result)
-}
 
 struct CalculatorBrain {
+ 
+
+// new elements for resolve task #2
     
+    private enum OpStack {
+        case operand (Double)
+        case operation (String)
+        case variable (String)
+    }
+
+    private var internalProgram = [OpStack] ()
+    
+    
+// Private part
     private var accumulator: Double?
     private var descriptionAccumulator: String?
     private let calcFormatter  = CalculatorFormatter()
+    private var operand : String?
     
-    var description: String? {
-        get {
-            if pendingBinaryOperation == nil {
-                return descriptionAccumulator
-            }else{
-                return pendingBinaryOperation!.descriptionFunction(pendingBinaryOperation!.descriptionOperand, descriptionAccumulator ?? "")
-            }
-        }
-    }
-    
-    var resultIsPending: Bool {
-        get {
-            return pendingBinaryOperation != nil
-        }
-    }
     
     private enum Operation {
         case constant(Double)
@@ -95,6 +84,23 @@ struct CalculatorBrain {
 
     }
     
+    private mutating func performPendingBinaryOperation(){
+        if pendingBinaryOperation != nil && accumulator != nil {
+            accumulator = pendingBinaryOperation!.perform(with: accumulator!)
+            descriptionAccumulator = pendingBinaryOperation!.performDescription(with: descriptionAccumulator!)
+            pendingBinaryOperation = nil
+        }
+    }
+
+    
+    func evaluate(using variables: Dictionary <String,Double>? = nil) -> (result : Double?,isPending : Bool, Description: String) {
+        
+        if variables != nil {
+            
+        }
+        
+        return (nil,true," ")
+    }
     
     mutating func performOperation(_ symbol: String) {
         if let operation = operations[symbol] {
@@ -134,8 +140,6 @@ struct CalculatorBrain {
             case .clear:
                 accumulator = nil
                 descriptionAccumulator = " "
-                // print("pendingBinaryOperation?.descriptionOperand: \(String(describing: pendingBinaryOperation?.descriptionOperand))")
-                pendingBinaryOperation?.descriptionOperand = " "
                 pendingBinaryOperation = nil
             case .equals:
                 performPendingBinaryOperation()
@@ -144,15 +148,26 @@ struct CalculatorBrain {
         }
     }
     
-    private mutating func performPendingBinaryOperation(){
-        if pendingBinaryOperation != nil && accumulator != nil {
-            accumulator = pendingBinaryOperation!.perform(with: accumulator!)
-            
-            descriptionAccumulator = pendingBinaryOperation!.performDescription(with: descriptionAccumulator!)
-           // print("descriptionAccumulator: \(String(describing: descriptionAccumulator))")
-            pendingBinaryOperation = nil
+    
+    
+// Public methods
+    var description: String? {
+        get {
+            if pendingBinaryOperation == nil {
+                return descriptionAccumulator
+            }else{
+                return pendingBinaryOperation!.descriptionFunction(pendingBinaryOperation!.descriptionOperand, descriptionAccumulator ?? "")
+            }
         }
     }
+    
+    var resultIsPending: Bool {
+        get {
+            return pendingBinaryOperation != nil
+        }
+    }
+
+    
     
     mutating func setOperand(_ operand: Double){
         accumulator = operand
@@ -162,9 +177,31 @@ struct CalculatorBrain {
         
     }
     
+    
+    mutating func setOperand(variable named: String){
+        operand = named
+        descriptionAccumulator = operand
+    }
+    
     var result : Double? {
         get {
             return accumulator
         }
     }
+    
+    
 }
+
+
+//calculate factorial function
+func factorialCalc(digit : Double) -> Double {
+    var n = Int(digit)
+    var result = 1
+    
+    while n > 1 {
+        result *= n
+        n -= 1
+    }
+    return Double(result)
+}
+
