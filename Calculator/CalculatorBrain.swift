@@ -52,23 +52,29 @@ struct CalculatorBrain {
     
     private var operations: Dictionary<String,Operation> =
         [
-            "π"     :   Operation.constant(Double.pi),
-            "cos"   :   Operation.uanaryOperation(cos,nil),
-            "sin"   :   Operation.uanaryOperation(sin,nil),
-            "e"     :   Operation.constant(M_E),
-            "ln"    :   Operation.uanaryOperation({log($0)/log(M_E)},nil),
-            "√"     :   Operation.uanaryOperation(sqrt,nil),
-            "x²"    :   Operation.uanaryOperation({$0 * $0}, { "(" + $0 + ")²" }),
-            "x!"    :   Operation.uanaryOperation(factorialCalc, { "(" + $0 + "!)" }),
-            "x⁻¹"   :   Operation.uanaryOperation({1/$0}, { "(" + $0 + ")⁻¹" }),
-            "±"     :   Operation.uanaryOperation({-$0},nil),
-            "×"     :   Operation.binaryOperation(*,nil),
-            "+"     :   Operation.binaryOperation(+,nil),
-            "-"     :   Operation.binaryOperation(-,nil),
-            "÷"     :   Operation.binaryOperation(/,nil),
-            "Rand"  :   Operation.nullaryOperation({ Double(arc4random())/Double(UInt32.max) },"Rand()"),
-            "="     :   Operation.equals,
-            "C"     :   Operation.clear
+            "π"         :   Operation.constant(Double.pi),
+            "cos"       :   Operation.uanaryOperation(cos,nil),
+            "sin"       :   Operation.uanaryOperation(sin,nil),
+            "cos⁻¹"     :   Operation.uanaryOperation(acos,nil),
+            "sin⁻¹"     :   Operation.uanaryOperation(asin,nil),
+            "tan"       :   Operation.uanaryOperation(tan,nil),
+            "tan⁻¹"     :   Operation.uanaryOperation(atan,nil),
+            "e"         :   Operation.constant(M_E),
+            "ln"        :   Operation.uanaryOperation({log($0)/log(M_E)},nil),
+            "log"       :   Operation.uanaryOperation(log10,nil),
+            "√"         :   Operation.uanaryOperation(sqrt,nil),
+            "x²"        :   Operation.uanaryOperation({$0 * $0}, { "(" + $0 + ")²" }),
+            "xʸ"        :   Operation.binaryOperation(pow, {$0 + " ^ " + $1}),
+            "x!"        :   Operation.uanaryOperation(factorialCalc, { "(" + $0 + "!)" }),
+            "x⁻¹"       :   Operation.uanaryOperation({1/$0}, { "(" + $0 + ")⁻¹" }),
+            "±"         :   Operation.uanaryOperation({-$0},nil),
+            "×"         :   Operation.binaryOperation(*,nil),
+            "+"         :   Operation.binaryOperation(+,nil),
+            "-"         :   Operation.binaryOperation(-,nil),
+            "÷"         :   Operation.binaryOperation(/,nil),
+            "Rand"      :   Operation.nullaryOperation({ Double(arc4random())/Double(UInt32.max) },"Rand()"),
+            "="         :   Operation.equals,
+            "C"         :   Operation.clear
         ]
     
     private var pendingBinaryOperation: PendingBinaryOperation?
@@ -143,7 +149,7 @@ struct CalculatorBrain {
             accumulator = pendingBinaryOperation!.perform(with: accumulator!)
             
             descriptionAccumulator = pendingBinaryOperation!.performDescription(with: descriptionAccumulator!)
-            print("descriptionAccumulator: \(String(describing: descriptionAccumulator))")
+           // print("descriptionAccumulator: \(String(describing: descriptionAccumulator))")
             pendingBinaryOperation = nil
         }
     }

@@ -45,9 +45,35 @@ class CalculatorTests: XCTestCase {
         testBrain.performOperation("sin")
         XCTAssertEqual(testBrain.result, 0.0)
         
+        testBrain.setOperand(1.0)
+        testBrain.performOperation("cos⁻¹")
+        XCTAssertEqual(testBrain.result, 0.0)
+        
+        testBrain.setOperand(1.0)
+        testBrain.performOperation("sin⁻¹")
+        XCTAssertEqual(testBrain.result, Double.pi/2)
+        
+        testBrain.performOperation("C")
+        testBrain.performOperation("π")
+        testBrain.performOperation("÷")
+        testBrain.setOperand(4)
+        testBrain.performOperation("=")
+        testBrain.performOperation("tan")
+        XCTAssertEqual(testBrain.result?.rounded(), 1.0)
+
+        testBrain.setOperand(1.0)
+        testBrain.performOperation("tan⁻¹")
+        XCTAssertEqual(testBrain.result, Double.pi/4)
+
+        
         testBrain.performOperation("e")
         testBrain.performOperation("ln")
         XCTAssertEqual(testBrain.result, 1.0)
+        
+        testBrain.setOperand(100)
+        testBrain.performOperation("log")
+        XCTAssertEqual(testBrain.result, 2)
+
         
         testBrain.setOperand(81)
         testBrain.performOperation("√")
@@ -55,6 +81,12 @@ class CalculatorTests: XCTestCase {
 
         testBrain.setOperand(4)
         testBrain.performOperation("x²")
+        XCTAssertEqual(testBrain.result, 16.0)
+        
+        testBrain.setOperand(2)
+        testBrain.performOperation("xʸ")
+        testBrain.setOperand(4)
+        testBrain.performOperation("=")
         XCTAssertEqual(testBrain.result, 16.0)
         
         testBrain.setOperand(5)
@@ -255,6 +287,31 @@ class CalculatorTests: XCTestCase {
         XCTAssertFalse(testBrain.resultIsPending)
         XCTAssertTrue(abs(testBrain.result! - 12.566370) < 0.0001)
 
+    }
+    
+    func testMissingParenthesisBug(){
+        var testBrain = CalculatorBrain()
+        
+        
+        testBrain.setOperand(7)
+        testBrain.performOperation("+")
+        testBrain.setOperand(3)
+        testBrain.performOperation("=")
+        testBrain.performOperation("x²")
+        XCTAssertEqual(testBrain.description, "(7 + 3)²")
+        XCTAssertFalse(testBrain.resultIsPending)
+        XCTAssertEqual(testBrain.result, 100.0)
+
+        testBrain.setOperand(5)
+        testBrain.performOperation("×")
+        testBrain.setOperand(4)
+        testBrain.performOperation("=")
+        testBrain.performOperation("x⁻¹")
+        XCTAssertEqual(testBrain.description, "(5 × 4)⁻¹")
+        XCTAssertFalse(testBrain.resultIsPending)
+        XCTAssertTrue((testBrain.result! - 0.05) < 0.0001)
+
+        
     }
     
     
