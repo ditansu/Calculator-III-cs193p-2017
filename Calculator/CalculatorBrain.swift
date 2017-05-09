@@ -22,10 +22,35 @@ struct CalculatorBrain {
 
     private var internalProgram = [OpStack] ()
     
+    //set vaiablr like "X"
+    mutating func setOperand(variable named: String){
+        internalProgram.append(OpStack.variable(named))
+    }
     
-// Private part
-    private var accumulator: Double?
-    private var descriptionAccumulator: String?
+    
+    mutating func setOperand(_ operand: Double){
+        // cache.accumulator = operand
+        // if let value = cache.accumulator {
+        //     cache.descriptionAccumulator = calcFormatter.string(from: NSNumber(value : value))
+        // }
+        internalProgram.append(OpStack.operand(operand))
+    }
+
+    mutating func performOperation(_ symbol: String) {
+        internalProgram.append(OpStack.operation(symbol))
+    }
+    
+    mutating func clear(){
+        internalProgram.removeAll()
+    }
+    
+    mutating func undo(){
+        if !internalProgram.isEmpty {
+            internalProgram = Array(internalProgram.dropLast())
+        }
+    }
+    
+    private var cache: (accumulator : Double?, descriptionAccumulator : String?)
     private let calcFormatter  = CalculatorFormatter()
     private var operand : String?
     
@@ -85,9 +110,9 @@ struct CalculatorBrain {
     }
     
     private mutating func performPendingBinaryOperation(){
-        if pendingBinaryOperation != nil && accumulator != nil {
-            accumulator = pendingBinaryOperation!.perform(with: accumulator!)
-            descriptionAccumulator = pendingBinaryOperation!.performDescription(with: descriptionAccumulator!)
+        if pendingBinaryOperation != nil && cache.accumulator != nil {
+            cache.accumulator = pendingBinaryOperation!.perform(with: cache.accumulator!)
+            cache.descriptionAccumulator = pendingBinaryOperation!.performDescription(with: cache.descriptionAccumulator!)
             pendingBinaryOperation = nil
         }
     }
@@ -102,19 +127,19 @@ struct CalculatorBrain {
         return (nil,true," ")
     }
     
-    mutating func performOperation(_ symbol: String) {
+   /* mutating func performOperation(_ symbol: String) {
         if let operation = operations[symbol] {
             switch operation {
             case .constant(let value):
-                accumulator = value
-                descriptionAccumulator = symbol
+                cache.accumulator = value
+                cache.descriptionAccumulator = symbol
             case .uanaryOperation (let function, var descFunction):
-                if accumulator != nil {
-                    accumulator = function(accumulator!)
+                if cache.accumulator != nil {
+                    cache.accumulator = function(cache.accumulator!)
                     if descFunction == nil {
                         descFunction = {symbol + "(" + $0 + ")"}
                     }
-                    descriptionAccumulator = descFunction!(descriptionAccumulator!)
+                    cache.descriptionAccumulator = descFunction!(cache.descriptionAccumulator!)
                 }
             case .binaryOperation(let function, var descFunction):
                 
@@ -123,40 +148,37 @@ struct CalculatorBrain {
                 }
                 
                 
-                if accumulator != nil {
+                if cache.accumulator != nil {
                     if descFunction == nil {
                         descFunction = {$0 + " " + symbol + " " + $1}
                     }
                     pendingBinaryOperation = PendingBinaryOperation(function: function,
-                                                                    firstOperand: accumulator!,
+                                                                    firstOperand: cache.accumulator!,
                                                                     descriptionFunction: descFunction!,
-                                                                    descriptionOperand: descriptionAccumulator!)
-                    accumulator = nil
-                    descriptionAccumulator = nil
+                                                                    descriptionOperand: cache.descriptionAccumulator!)
+                    cache.accumulator = nil
+                    cache.descriptionAccumulator = nil
                 }
             case .nullaryOperation(let function, let descValue):
-                accumulator = function()
-                descriptionAccumulator = descValue
+                cache.accumulator = function()
+                cache.descriptionAccumulator = descValue
             case .clear:
-                accumulator = nil
-                descriptionAccumulator = " "
+                cache = (nil, " ")
                 pendingBinaryOperation = nil
             case .equals:
                 performPendingBinaryOperation()
                           
             }
         }
-    }
+    } */
     
     
-    
-// Public methods
     var description: String? {
         get {
             if pendingBinaryOperation == nil {
-                return descriptionAccumulator
+                return cache.descriptionAccumulator
             }else{
-                return pendingBinaryOperation!.descriptionFunction(pendingBinaryOperation!.descriptionOperand, descriptionAccumulator ?? "")
+                return pendingBinaryOperation!.descriptionFunction(pendingBinaryOperation!.descriptionOperand, cache.descriptionAccumulator ?? "")
             }
         }
     }
@@ -169,23 +191,12 @@ struct CalculatorBrain {
 
     
     
-    mutating func setOperand(_ operand: Double){
-        accumulator = operand
-        if let value = accumulator {
-            descriptionAccumulator = calcFormatter.string(from: NSNumber(value : value))
-        }
-        
-    }
     
-    
-    mutating func setOperand(variable named: String){
-        operand = named
-        descriptionAccumulator = operand
-    }
+   
     
     var result : Double? {
         get {
-            return accumulator
+            return cache.accumulator
         }
     }
     

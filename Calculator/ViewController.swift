@@ -100,7 +100,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func clearCalculator(_ sender: UIButton) {
-        brain.performOperation("C")
+        brain.clear()
         displayValue = 0
         history.text = " "
         floatIsInTheMiddleOfTyping = false
