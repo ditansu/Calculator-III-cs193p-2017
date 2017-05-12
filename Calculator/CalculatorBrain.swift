@@ -22,7 +22,7 @@ struct CalculatorBrain {
 
     private var internalProgram = [OpStack] ()
     
-    //set vaiablr like "X"
+    //set variable like "X"
     mutating func setOperand(variable named: String){
         internalProgram.append(OpStack.variable(named))
     }
@@ -50,7 +50,8 @@ struct CalculatorBrain {
         }
     }
     
-    private var cache: (accumulator : Double?, descriptionAccumulator : String?)
+    
+    private var cache: (accumulator : Double?, descriptionAccumulator : String?) // prepare to delete
     private let calcFormatter  = CalculatorFormatter()
     private var operand : String?
     
@@ -91,7 +92,7 @@ struct CalculatorBrain {
             "C"         :   Operation.clear
         ]
     
-    private var pendingBinaryOperation: PendingBinaryOperation?
+    
     
     private struct PendingBinaryOperation {
         let function: ((Double,Double)->(Double))
@@ -109,94 +110,126 @@ struct CalculatorBrain {
 
     }
     
-    private mutating func performPendingBinaryOperation(){
-        if pendingBinaryOperation != nil && cache.accumulator != nil {
-            cache.accumulator = pendingBinaryOperation!.perform(with: cache.accumulator!)
-            cache.descriptionAccumulator = pendingBinaryOperation!.performDescription(with: cache.descriptionAccumulator!)
-            pendingBinaryOperation = nil
-        }
-    }
-
+    //
+    // CORE FUNCTION 
+    //
     
     func evaluate(using variables: Dictionary <String,Double>? = nil) -> (result : Double?,isPending : Bool, Description: String) {
         
-        if variables != nil {
-            
+       //
+       // Var & const section
+       //
+        
+        var cache: (accumulator : Double?, descriptionAccumulator : String?)
+        var pendingBinaryOperation: PendingBinaryOperation?
+        var description: String? {
+            get {
+                if pendingBinaryOperation == nil {
+                    return cache.descriptionAccumulator
+                }else{
+                    return pendingBinaryOperation!.descriptionFunction(pendingBinaryOperation!.descriptionOperand, cache.descriptionAccumulator ?? "")
+                }
+            }
         }
+        
+        var result : Double? {
+            get {
+                return cache.accumulator
+            }
+        }
+
+        var resultIsPending: Bool {
+            get {
+                return pendingBinaryOperation != nil
+            }
+        }
+
+        //
+        // Nested func for calc
+        //
+        
+        func performPendingBinaryOperation(){
+            if pendingBinaryOperation != nil && cache.accumulator != nil {
+                cache.accumulator = pendingBinaryOperation!.perform(with: cache.accumulator!)
+                cache.descriptionAccumulator = pendingBinaryOperation!.performDescription(with: cache.descriptionAccumulator!)
+                pendingBinaryOperation = nil
+            }
+        }
+
+        func performOperation(_ symbol: String) {
+            if let operation = operations[symbol] {
+                switch operation {
+                case .constant(let value):
+                    cache.accumulator = value
+                    cache.descriptionAccumulator = symbol
+                case .uanaryOperation (let function, var descFunction):
+                    if cache.accumulator != nil {
+                        cache.accumulator = function(cache.accumulator!)
+                        if descFunction == nil {
+                            descFunction = {symbol + "(" + $0 + ")"}
+                        }
+                        cache.descriptionAccumulator = descFunction!(cache.descriptionAccumulator!)
+                    }
+                case .binaryOperation(let function, var descFunction):
+                    
+                    if resultIsPending  {
+                        performPendingBinaryOperation()
+                    }
+                    
+                    
+                    if cache.accumulator != nil {
+                        if descFunction == nil {
+                            descFunction = {$0 + " " + symbol + " " + $1}
+                        }
+                        pendingBinaryOperation = PendingBinaryOperation(function: function,
+                                                                        firstOperand: cache.accumulator!,
+                                                                        descriptionFunction: descFunction!,
+                                                                        descriptionOperand: cache.descriptionAccumulator!)
+                        cache.accumulator = nil
+                        cache.descriptionAccumulator = nil
+                    }
+                case .nullaryOperation(let function, let descValue):
+                    cache.accumulator = function()
+                    cache.descriptionAccumulator = descValue
+                case .clear:
+                    cache = (nil, " ")
+                    pendingBinaryOperation = nil
+                case .equals:
+                    performPendingBinaryOperation()
+                    
+                }
+            }
+        }
+        
+        
         
         return (nil,true," ")
     }
     
-   /* mutating func performOperation(_ symbol: String) {
-        if let operation = operations[symbol] {
-            switch operation {
-            case .constant(let value):
-                cache.accumulator = value
-                cache.descriptionAccumulator = symbol
-            case .uanaryOperation (let function, var descFunction):
-                if cache.accumulator != nil {
-                    cache.accumulator = function(cache.accumulator!)
-                    if descFunction == nil {
-                        descFunction = {symbol + "(" + $0 + ")"}
-                    }
-                    cache.descriptionAccumulator = descFunction!(cache.descriptionAccumulator!)
-                }
-            case .binaryOperation(let function, var descFunction):
-                
-                if resultIsPending  {
-                    performPendingBinaryOperation()
-                }
-                
-                
-                if cache.accumulator != nil {
-                    if descFunction == nil {
-                        descFunction = {$0 + " " + symbol + " " + $1}
-                    }
-                    pendingBinaryOperation = PendingBinaryOperation(function: function,
-                                                                    firstOperand: cache.accumulator!,
-                                                                    descriptionFunction: descFunction!,
-                                                                    descriptionOperand: cache.descriptionAccumulator!)
-                    cache.accumulator = nil
-                    cache.descriptionAccumulator = nil
-                }
-            case .nullaryOperation(let function, let descValue):
-                cache.accumulator = function()
-                cache.descriptionAccumulator = descValue
-            case .clear:
-                cache = (nil, " ")
-                pendingBinaryOperation = nil
-            case .equals:
-                performPendingBinaryOperation()
-                          
-            }
-        }
-    } */
     
-    
+
     var description: String? {
         get {
-            if pendingBinaryOperation == nil {
+        /*    if pendingBinaryOperation == nil {
                 return cache.descriptionAccumulator
             }else{
                 return pendingBinaryOperation!.descriptionFunction(pendingBinaryOperation!.descriptionOperand, cache.descriptionAccumulator ?? "")
-            }
+            }*/
+            return evaluate().Description
         }
     }
     
     var resultIsPending: Bool {
         get {
-            return pendingBinaryOperation != nil
+            return evaluate().isPending
         }
     }
 
     
     
-    
-   
-    
     var result : Double? {
         get {
-            return cache.accumulator
+            return evaluate().result
         }
     }
     
