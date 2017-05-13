@@ -8,13 +8,11 @@
 
 import UIKit
 
-let calcFormatter = CalculatorFormatter()
-
 class ViewController: UIViewController {
     
     @IBOutlet weak var display: UILabel!
     @IBOutlet weak var history: UILabel!
-   
+    
     @IBOutlet weak var buttonPoint: UIButton! {
         didSet {
             buttonPoint.setTitle(decimalSeparator, for: UIControlState())
@@ -23,10 +21,17 @@ class ViewController: UIViewController {
     
     
     var userIsInTheMiddleOfTyping = false
-    var floatIsInTheMiddleOfTyping  = false
+    // var floatIsInTheMiddleOfTyping  = false  //MOVE IT TO touchDigit
+    
+    //MODEL {
     
     private var brain = CalculatorBrain()
-    let decimalSeparator = calcFormatter.decimalSeparator ?? "."
+    private var variables = [String:Double]()
+    
+    // }
+    private let decimalSeparator = calcFormatter.decimalSeparator ?? "."
+    
+    
     
     var displayValue: Double {
         get {
@@ -36,74 +41,72 @@ class ViewController: UIViewController {
             display.text = calcFormatter.string(from: NSNumber(value: newValue))
         }
     }
-
-    
     
     @IBAction func touchDigit(_ sender: UIButton) {
         let digit = sender.currentTitle!
         
-        // blocking second separater input
         
-        
+        // the decimal separator input processing
         if digit == decimalSeparator {
             
-            if floatIsInTheMiddleOfTyping {
-                return
-            } else {
-                floatIsInTheMiddleOfTyping = true
-            }
+            guard !(display.text!.contains(decimalSeparator) && userIsInTheMiddleOfTyping) else {return}
             
-            if  !userIsInTheMiddleOfTyping  {  //!brain.resultIsPending && 
-                display.text! = "0"
+            // for case if User start an input from the decimal separator
+            if  !userIsInTheMiddleOfTyping  {
+                display.text! = "0" + decimalSeparator
+                userIsInTheMiddleOfTyping = true
+                return
             }
             
             display.text! += digit
             userIsInTheMiddleOfTyping = true
-            return
-        }
-        
-        if floatIsInTheMiddleOfTyping {
-            display.text! += digit
             return
         }
         
         
         if userIsInTheMiddleOfTyping {
+            
             let textCurrentlyInDisplay = display.text!
             let bufferForDisplayedText  = textCurrentlyInDisplay + digit
             let doubleCurrentTotal = calcFormatter.formatterStrToDbl(from:  bufferForDisplayedText)  ?? 0.0
             display!.text  = calcFormatter.string(from: NSNumber(value: doubleCurrentTotal))
+            
         } else {
+            
             display.text = digit
             userIsInTheMiddleOfTyping = true
+            
         }
     }
     
-   
+    
     
     @IBAction func performOperation (_ sender: UIButton) {
         
         if userIsInTheMiddleOfTyping {
             brain.setOperand(displayValue)
             userIsInTheMiddleOfTyping = false
-            floatIsInTheMiddleOfTyping  = false
         }
         
         if let mathemaicalSymbol = sender.currentTitle {
             brain.performOperation(mathemaicalSymbol)
         }
         
-        if let result = brain.result {
+        let (evaluateResult, resultIsPending, evaluateDesciption ) = brain.evaluate(using: variables)
+        
+        
+        if let result = evaluateResult {
             displayValue = result
         }
-        history.text = brain.description! + (brain.resultIsPending ? " _" : " =")
+        history.text = evaluateDesciption + (resultIsPending ? " _" : " =")
+        
+        
     }
     
     @IBAction func clearCalculator(_ sender: UIButton) {
         brain.clear()
         displayValue = 0
         history.text = " "
-        floatIsInTheMiddleOfTyping = false
     }
     
     @IBAction func backspace(_ sender: UIButton) {
@@ -115,12 +118,12 @@ class ViewController: UIViewController {
         // delete the group separator together with gigit
         var textCurrentlyInDisplay = display.text!
         let index = textCurrentlyInDisplay.index(before: textCurrentlyInDisplay.endIndex)
-       
+        
         if String(textCurrentlyInDisplay[index]) == calcFormatter.groupingSeparator {
             display.text = String (display.text!.characters.dropLast())
         }
-      
-        // do backspace by dropLast method        
+        
+        // do backspace by dropLast method
         textCurrentlyInDisplay = display.text!
         textCurrentlyInDisplay = String (textCurrentlyInDisplay.characters.dropLast())
         let doubleCurrentTotal = calcFormatter.formatterStrToDbl(from: textCurrentlyInDisplay)  ?? 0.0
@@ -129,7 +132,6 @@ class ViewController: UIViewController {
         if display.text!.isEmpty {
             displayValue = 0
             userIsInTheMiddleOfTyping = false
-            floatIsInTheMiddleOfTyping  = false
         }
     }
     

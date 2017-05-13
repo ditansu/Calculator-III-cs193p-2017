@@ -8,6 +8,7 @@
 
 import Foundation
 
+let calcFormatter = CalculatorFormatter()
 
 class CalculatorFormatter: NumberFormatter {
     required init?(coder aDecoder: NSCoder) {
