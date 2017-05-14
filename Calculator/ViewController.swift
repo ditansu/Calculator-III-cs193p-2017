@@ -12,6 +12,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var display: UILabel!
     @IBOutlet weak var history: UILabel!
+    @IBOutlet weak var displayM: UILabel!
     
     @IBOutlet weak var buttonPoint: UIButton! {
         didSet {
@@ -21,7 +22,6 @@ class ViewController: UIViewController {
     
     
     var userIsInTheMiddleOfTyping = false
-    // var floatIsInTheMiddleOfTyping  = false  //MOVE IT TO touchDigit
     
     //MODEL {
     
@@ -29,9 +29,15 @@ class ViewController: UIViewController {
     private var variables = [String:Double]()
     
     // }
+    
     private let decimalSeparator = calcFormatter.decimalSeparator ?? "."
     
-    
+    var displayResult : (result : Double?, isPending : Bool, Description: String) = (nil, false, " ") {
+        didSet {
+            displayValue = displayResult.result ?? 0.0
+            displayM.text = calcFormatter.string(from: NSNumber(value: variables["M"] ?? 0))
+        }
+    }
     
     var displayValue: Double {
         get {
@@ -133,6 +139,23 @@ class ViewController: UIViewController {
             displayValue = 0
             userIsInTheMiddleOfTyping = false
         }
+    }
+    
+    @IBAction func setM(_ sender: UIButton) {
+        userIsInTheMiddleOfTyping = false
+        
+        let symbol = String((sender.currentTitle!).characters.dropFirst())
+        variables[symbol] = displayValue
+        
+        displayResult = brain.evaluate(using: variables)
+        
+    }
+    
+    @IBAction func pushM(_ sender: UIButton) {
+        
+        brain.setOperand(variable: sender.currentTitle!)
+        displayResult = brain.evaluate(using: variables)
+    
     }
     
 }

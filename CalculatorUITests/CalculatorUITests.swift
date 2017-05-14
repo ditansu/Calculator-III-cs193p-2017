@@ -483,12 +483,43 @@ class CalculatorUITests: XCTestCase {
         if let pendingResult = calcFormatter.string(from: NSNumber(value: 327891)) {
             XCTAssert(app.staticTexts[pendingResult].exists)
         }
-
-        
-        
         
     }
     
+    func testMemo() {
+        
+        
+        buttonDict["C"]?.tap()
+        
+        // 9 +  M = √ ⇒ description имеет вид √(9+M), display показывает 3, так как M не установлена (то есть равна 0)
+        
+        buttonDict["9"]?.tap()
+        buttonDict["+"]?.tap()
+        buttonDict["M"]?.tap()
+        buttonDict["="]?.tap()
+        buttonDict["√"]?.tap()
+        XCTAssert(app.staticTexts["√(9 + M) ="].exists)
+        XCTAssert(app.staticTexts["3"].exists)
+    
+        
+        // 7 →M >⇒ display теперь показывает 4 (квадратный корень 16), description все еще показывает √(9+M)
+        
+        buttonDict["7"]?.tap()
+        buttonDict["→M"]?.tap()
+        XCTAssert(app.staticTexts["√(9 + M) ="].exists)
+        XCTAssert(app.staticTexts["4"].exists)
+        XCTAssert(app.staticTexts["7"].exists)
+        //+14  = ⇒ display показывает 18, description теперь √(9+M)+14
+        
+        buttonDict["+"]?.tap()
+        buttonDict["14"]?.tap()
+        XCTAssert(app.staticTexts["√(9 + M) + 14 ="].exists)
+        XCTAssert(app.staticTexts["18"].exists)
+        XCTAssert(app.staticTexts["7"].exists)
+    
+        
+    }
+
     
     
 }

@@ -68,6 +68,9 @@
                                                         <state key="normal" title="→M">
                                                             <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                         </state>
+                                                        <connections>
+                                                            <action selector="setM:" destination="BYZ-38-t0r" eventType="touchUpInside" id="M17-XD-5Tb"/>
+                                                        </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0PT-tt-gTn">
                                                         <rect key="frame" x="117.5" y="0.0" width="108" height="58.5"/>
@@ -76,6 +79,9 @@
                                                         <state key="normal" title="M">
                                                             <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                         </state>
+                                                        <connections>
+                                                            <action selector="pushM:" destination="BYZ-38-t0r" eventType="touchUpInside" id="a3w-5s-WEW"/>
+                                                        </connections>
                                                     </button>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aPm-Ut-efM">
                                                         <rect key="frame" x="235.5" y="0.0" width="107.5" height="58.5"/>
@@ -482,6 +488,7 @@
                     <connections>
                         <outlet property="buttonPoint" destination="iiQ-te-YEh" id="MmQ-VH-ZF7"/>
                         <outlet property="display" destination="Sej-55-XYQ" id="5pg-uv-fjK"/>
+                        <outlet property="displayM" destination="R4m-Fq-aQD" id="Pn8-nS-8wm"/>
                         <outlet property="history" destination="l0K-V6-B2G" id="o3t-YN-uhE"/>
                     </connections>
                 </viewController>
