@@ -32,19 +32,27 @@ class ViewController: UIViewController {
     
     private let decimalSeparator = calcFormatter.decimalSeparator ?? "."
     
-    var displayResult : (result : Double?, isPending : Bool, Description: String) = (nil, false, " ") {
+    var displayResult : (result : Double?, isPending : Bool, Description: String, error : String?) = (nil, false, " ",nil) {
         didSet {
-            displayValue = displayResult.result ?? 0.0
+            switch displayResult {
+            case (nil, _, " ",nil) : displayValue = 0
+            case (let result, _, _,nil) : displayValue = result
+            case ( _, _, _, let error) : display.text = error!
+            }
+            
+            history.text = displayResult.Description != " " ? displayResult.Description + (displayResult.isPending ? " _" : " =") : " "
             displayM.text = calcFormatter.string(from: NSNumber(value: variables["M"] ?? 0))
         }
     }
     
-    var displayValue: Double {
+    var displayValue: Double? {
         get {
             return calcFormatter.formatterStrToDbl(from: display.text!) ?? 0.0
         }
         set {
-            display.text = calcFormatter.string(from: NSNumber(value: newValue))
+            if let value = newValue {
+                display.text = calcFormatter.string(from: NSNumber(value: value))
+            }
         }
     }
     
@@ -90,7 +98,9 @@ class ViewController: UIViewController {
     @IBAction func performOperation (_ sender: UIButton) {
         
         if userIsInTheMiddleOfTyping {
-            brain.setOperand(displayValue)
+            if let value = displayValue {
+                brain.setOperand(value)
+            }
             userIsInTheMiddleOfTyping = false
         }
         
@@ -98,46 +108,41 @@ class ViewController: UIViewController {
             brain.performOperation(mathemaicalSymbol)
         }
         
-        let (evaluateResult, resultIsPending, evaluateDesciption ) = brain.evaluate(using: variables)
-        
-        
-        if let result = evaluateResult {
-            displayValue = result
-        }
-        history.text = evaluateDesciption + (resultIsPending ? " _" : " =")
-        
-        
+        displayResult = brain.evaluate(using: variables)
     }
     
     @IBAction func clearCalculator(_ sender: UIButton) {
         brain.clear()
-        displayValue = 0
-        history.text = " "
+        variables = [:]
+        displayResult = brain.evaluate()
     }
     
     @IBAction func backspace(_ sender: UIButton) {
-        
-        guard userIsInTheMiddleOfTyping && !display.text!.isEmpty else {
-            return
-        }
-        
-        // delete the group separator together with gigit
-        var textCurrentlyInDisplay = display.text!
-        let index = textCurrentlyInDisplay.index(before: textCurrentlyInDisplay.endIndex)
-        
-        if String(textCurrentlyInDisplay[index]) == calcFormatter.groupingSeparator {
-            display.text = String (display.text!.characters.dropLast())
-        }
-        
-        // do backspace by dropLast method
-        textCurrentlyInDisplay = display.text!
-        textCurrentlyInDisplay = String (textCurrentlyInDisplay.characters.dropLast())
-        let doubleCurrentTotal = calcFormatter.formatterStrToDbl(from: textCurrentlyInDisplay)  ?? 0.0
-        display!.text  = calcFormatter.string(from: NSNumber(value: doubleCurrentTotal))
-        
-        if display.text!.isEmpty {
-            displayValue = 0
-            userIsInTheMiddleOfTyping = false
+        if userIsInTheMiddleOfTyping {
+            guard  !display.text!.isEmpty else { return }
+            
+            // delete the group separator together with gigit
+            var textCurrentlyInDisplay = display.text!
+            let index = textCurrentlyInDisplay.index(before: textCurrentlyInDisplay.endIndex)
+            
+            if String(textCurrentlyInDisplay[index]) == calcFormatter.groupingSeparator {
+                display.text = String (display.text!.characters.dropLast())
+            }
+            
+            // do backspace by dropLast method
+            textCurrentlyInDisplay = display.text!
+            textCurrentlyInDisplay = String (textCurrentlyInDisplay.characters.dropLast())
+            let doubleCurrentTotal = calcFormatter.formatterStrToDbl(from: textCurrentlyInDisplay)  ?? 0.0
+            display!.text  = calcFormatter.string(from: NSNumber(value: doubleCurrentTotal))
+            
+            if display.text!.isEmpty {
+                userIsInTheMiddleOfTyping = false
+                displayResult = brain.evaluate(using: variables)
+                
+            }
+        } else {
+            brain.undo()
+            displayResult = brain.evaluate(using: variables)
         }
     }
     
@@ -155,7 +160,7 @@ class ViewController: UIViewController {
         
         brain.setOperand(variable: sender.currentTitle!)
         displayResult = brain.evaluate(using: variables)
-    
+        
     }
     
 }

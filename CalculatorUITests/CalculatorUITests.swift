@@ -90,8 +90,10 @@ class CalculatorUITests: XCTestCase {
             "Rand"  :   app.buttons["Rand"],
             "="     :   app.buttons["="],
             "C"     :   app.buttons["C"],
-            "⌫"     :   app.buttons["⌫"],
-            point     :   app.buttons[point]
+            "⌫"    :   app.buttons["⌫"],
+            point   :   app.buttons[point],
+            "→M"    :   app.buttons["→M"],
+            "M"     :   app.buttons["M"]
         ]
         
         
@@ -512,7 +514,9 @@ class CalculatorUITests: XCTestCase {
         //+14  = ⇒ display показывает 18, description теперь √(9+M)+14
         
         buttonDict["+"]?.tap()
-        buttonDict["14"]?.tap()
+        buttonDict["1"]?.tap()
+        buttonDict["4"]?.tap()
+        buttonDict["="]?.tap()
         XCTAssert(app.staticTexts["√(9 + M) + 14 ="].exists)
         XCTAssert(app.staticTexts["18"].exists)
         XCTAssert(app.staticTexts["7"].exists)
