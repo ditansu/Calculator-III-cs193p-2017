@@ -80,8 +80,9 @@ class CalculatorUITests: XCTestCase {
             "ln"    :   app.buttons["ln"],
             "√"     :   app.buttons["√"],
             "x²"    :   app.buttons["x²"],
+            "xʸ"    :   app.buttons["xʸ"],
             "x!"    :   app.buttons["x!"],
-            //"x⁻¹"   :   app.buttons["x⁻¹"],
+            "x⁻¹"   :   app.buttons["x⁻¹"],
             "±"     :   app.buttons["±"],
             "×"     :   app.buttons["×"],
             "+"     :   app.buttons["+"],
@@ -106,6 +107,22 @@ class CalculatorUITests: XCTestCase {
     
     
     
+    func testPriority(){
+        // check algeba, input: 100*10/2+16*4 = "564" need follow to math operations right order, not realized
+        
+        buttonDict["4"]?.tap()
+        buttonDict["+"]?.tap()
+        buttonDict["5"]?.tap()
+        buttonDict["×"]?.tap()
+        buttonDict["2"]?.tap()
+        buttonDict["xʸ"]?.tap()
+        buttonDict["2"]?.tap()
+        buttonDict["="]?.tap()
+        
+        XCTAssert(app.staticTexts["324"].exists)
+        XCTAssert(app.staticTexts["((4 + 5) × 2) ^ 2 ="].exists)
+    
+    }
     
     
     func testGeneral() {

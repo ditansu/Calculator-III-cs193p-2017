@@ -192,8 +192,9 @@ struct CalculatorBrain {
                     cache.descriptionAccumulator = symbol
                     
                 case .uanaryOperation (let function, var descFunction, let validator):
-                    error = validator?(cache.accumulator!)
+            
                     if cache.accumulator != nil {
+                        error = validator?(cache.accumulator!)
                         cache.accumulator = function(cache.accumulator!)
                         
                         if descFunction == nil {
