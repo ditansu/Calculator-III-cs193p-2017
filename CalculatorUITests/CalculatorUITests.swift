@@ -331,7 +331,7 @@ class CalculatorUITests: XCTestCase {
         buttonDict["⌫"]?.tap()
         buttonDict["⌫"]?.tap()
         
-        if let pendingResult = calcFormatter.string(from: NSNumber(value: 1492026)) {
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 557237)) {
             XCTAssert(app.staticTexts[pendingResult].exists)
         }
         
@@ -352,7 +352,7 @@ class CalculatorUITests: XCTestCase {
         
         buttonDict["="]?.tap()
         
-        if let pendingResult = calcFormatter.string(from: NSNumber(value: 1492051)) {
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 934814)) {
             XCTAssert(app.staticTexts[pendingResult].exists)
         }
     }
