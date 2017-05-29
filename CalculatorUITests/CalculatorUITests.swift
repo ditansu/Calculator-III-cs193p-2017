@@ -80,8 +80,9 @@ class CalculatorUITests: XCTestCase {
             "ln"    :   app.buttons["ln"],
             "√"     :   app.buttons["√"],
             "x²"    :   app.buttons["x²"],
+            "xʸ"    :   app.buttons["xʸ"],
             "x!"    :   app.buttons["x!"],
-            //"x⁻¹"   :   app.buttons["x⁻¹"],
+            "x⁻¹"   :   app.buttons["x⁻¹"],
             "±"     :   app.buttons["±"],
             "×"     :   app.buttons["×"],
             "+"     :   app.buttons["+"],
@@ -90,8 +91,10 @@ class CalculatorUITests: XCTestCase {
             "Rand"  :   app.buttons["Rand"],
             "="     :   app.buttons["="],
             "C"     :   app.buttons["C"],
-            "⌫"     :   app.buttons["⌫"],
-            point     :   app.buttons[point]
+            "⌫"    :   app.buttons["⌫"],
+            point   :   app.buttons[point],
+            "→M"    :   app.buttons["→M"],
+            "M"     :   app.buttons["M"]
         ]
         
         
@@ -104,6 +107,22 @@ class CalculatorUITests: XCTestCase {
     
     
     
+    func testPriority(){
+        // check algeba, input: 100*10/2+16*4 = "564" need follow to math operations right order, not realized
+        
+        buttonDict["4"]?.tap()
+        buttonDict["+"]?.tap()
+        buttonDict["5"]?.tap()
+        buttonDict["×"]?.tap()
+        buttonDict["2"]?.tap()
+        buttonDict["xʸ"]?.tap()
+        buttonDict["2"]?.tap()
+        buttonDict["="]?.tap()
+        
+        XCTAssert(app.staticTexts["324"].exists)
+        XCTAssert(app.staticTexts["((4 + 5) × 2) ^ 2 ="].exists)
+    
+    }
     
     
     func testGeneral() {
@@ -329,7 +348,7 @@ class CalculatorUITests: XCTestCase {
         buttonDict["⌫"]?.tap()
         buttonDict["⌫"]?.tap()
         
-        if let pendingResult = calcFormatter.string(from: NSNumber(value: 1492026)) {
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 557237)) {
             XCTAssert(app.staticTexts[pendingResult].exists)
         }
         
@@ -350,7 +369,7 @@ class CalculatorUITests: XCTestCase {
         
         buttonDict["="]?.tap()
         
-        if let pendingResult = calcFormatter.string(from: NSNumber(value: 1492051)) {
+        if let pendingResult = calcFormatter.string(from: NSNumber(value: 934814)) {
             XCTAssert(app.staticTexts[pendingResult].exists)
         }
     }
@@ -483,12 +502,45 @@ class CalculatorUITests: XCTestCase {
         if let pendingResult = calcFormatter.string(from: NSNumber(value: 327891)) {
             XCTAssert(app.staticTexts[pendingResult].exists)
         }
-
-        
-        
         
     }
     
+    func testMemo() {
+        
+        
+        buttonDict["C"]?.tap()
+        
+        // 9 +  M = √ ⇒ description имеет вид √(9+M), display показывает 3, так как M не установлена (то есть равна 0)
+        
+        buttonDict["9"]?.tap()
+        buttonDict["+"]?.tap()
+        buttonDict["M"]?.tap()
+        buttonDict["="]?.tap()
+        buttonDict["√"]?.tap()
+        XCTAssert(app.staticTexts["√(9 + M) ="].exists)
+        XCTAssert(app.staticTexts["3"].exists)
+    
+        
+        // 7 →M >⇒ display теперь показывает 4 (квадратный корень 16), description все еще показывает √(9+M)
+        
+        buttonDict["7"]?.tap()
+        buttonDict["→M"]?.tap()
+        XCTAssert(app.staticTexts["√(9 + M) ="].exists)
+        XCTAssert(app.staticTexts["4"].exists)
+        XCTAssert(app.staticTexts["7"].exists)
+        //+14  = ⇒ display показывает 18, description теперь √(9+M)+14
+        
+        buttonDict["+"]?.tap()
+        buttonDict["1"]?.tap()
+        buttonDict["4"]?.tap()
+        buttonDict["="]?.tap()
+        XCTAssert(app.staticTexts["√(9 + M) + 14 ="].exists)
+        XCTAssert(app.staticTexts["18"].exists)
+        XCTAssert(app.staticTexts["7"].exists)
+    
+        
+    }
+
     
     
 }

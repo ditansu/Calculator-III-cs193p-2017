@@ -53,7 +53,7 @@ class CalculatorTests: XCTestCase {
         testBrain.performOperation("sin⁻¹")
         XCTAssertEqual(testBrain.result, Double.pi/2)
         
-        testBrain.performOperation("C")
+        testBrain.clear()
         testBrain.performOperation("π")
         testBrain.performOperation("÷")
         testBrain.setOperand(4)
@@ -225,7 +225,7 @@ class CalculatorTests: XCTestCase {
  
 
         //g. 7 + 9 √ = будет показано “7 + √(9) =“ (10 на  display ) также проверяет корректность clear
-        testBrain.performOperation("C")
+        testBrain.clear()
         testBrain.setOperand(7)
         testBrain.performOperation("+")
         testBrain.setOperand(9)
