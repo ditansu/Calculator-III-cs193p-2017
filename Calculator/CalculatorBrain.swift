@@ -11,17 +11,7 @@ import Foundation
 struct CalculatorBrain {
     
     
-    // Private members
-
-
-    // new elements for resolve task #2
-    private enum OpStack {
-        case operand (Double)
-        case operation (String)
-        case variable (String)
-    }
-    
-    private var internalProgram = [OpStack] ()
+    // Calculator operations including function/constants, description (if need), guard check (if need) + error message
     
     enum Operation {
         case constant(Double)
@@ -35,8 +25,8 @@ struct CalculatorBrain {
         "π"         :   Operation.constant(Double.pi),
         "cos"       :   Operation.uanaryOperation(cos,nil,nil),
         "sin"       :   Operation.uanaryOperation(sin,nil,nil),
-        "cos⁻¹"     :   Operation.uanaryOperation(acos,nil,{ $0 < -1.0 || $0 > 1.0 ? "не в диапозоне [-1,1]" : nil}),
-        "sin⁻¹"     :   Operation.uanaryOperation(asin,nil,{ $0 < -1.0 || $0 > 1.0 ? "не в диапозоне [-1,1]" : nil}),
+        "cos⁻¹"     :   Operation.uanaryOperation(acos,nil,{ $0 < -1.0 || $0 > 1.0 ? "не в диапазоне [-1,1]" : nil}),
+        "sin⁻¹"     :   Operation.uanaryOperation(asin,nil,{ $0 < -1.0 || $0 > 1.0 ? "не в диапазоне [-1,1]" : nil}),
         "tan"       :   Operation.uanaryOperation(tan,nil,nil),
         "tan⁻¹"     :   Operation.uanaryOperation(atan,nil,nil),
         "e"         :   Operation.constant(M_E),
@@ -57,8 +47,15 @@ struct CalculatorBrain {
     ]
 
     
-    // Public Methods
+    // The Calculator  "programing"
     
+    private enum OpStack {
+        case operand (Double)
+        case operation (String)
+        case variable (String)
+    }
+    
+    private var internalProgram = [OpStack] ()
     
     mutating func setOperand(variable named: String){
         internalProgram.append(OpStack.variable(named))
@@ -85,7 +82,7 @@ struct CalculatorBrain {
     
     
     //
-    // HI-ORDER FUNCTION
+    // HEART OF CALCULATOR BRAIN
     //
     
     func evaluate(using variables: Dictionary <String,Double>? = nil) -> (result : Double?,isPending : Bool, Description: String, error: String?) {
@@ -93,8 +90,6 @@ struct CalculatorBrain {
         //
         // Var & const section
         //
-        
-        
         
          struct PendingBinaryOperation {
             let function: ((Double,Double)->(Double))
@@ -258,7 +253,7 @@ struct CalculatorBrain {
         
         return (result,resultIsPending,description ?? " ", error)
         
-    } // MASTER FUNC END
+    } // HEART FUNC END
     
     @available(iOS,deprecated, message: "Deprecated, no longer needed, use the func evaluate(...) instead" )
     var description: String? {

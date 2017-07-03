@@ -8,7 +8,8 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class CalculatorViewController: UIViewController, UISplitViewControllerDelegate {
+    
     
     @IBOutlet weak var display: UILabel!
     @IBOutlet weak var history: UILabel!
@@ -19,6 +20,17 @@ class ViewController: UIViewController {
             buttonPoint.setTitle(decimalSeparator, for: UIControlState())
         }
     }
+    
+    private var graphButtonActiveColor = UIColor.black
+    
+    @IBOutlet weak var graph: UIButton! {
+        didSet {
+            graph.isEnabled = false
+            graphButtonActiveColor = graph.backgroundColor!
+            graph.backgroundColor = UIColor.lightGray
+        }
+    }
+    
     
     
     var userIsInTheMiddleOfTyping = false
@@ -34,6 +46,11 @@ class ViewController: UIViewController {
     
     var displayResult : (result : Double?, isPending : Bool, Description: String, error : String?) = (nil, false, " ",nil) {
         didSet {
+            
+            graph.isEnabled = !displayResult.isPending && displayResult.result != nil // "displayResult.result != nil" fix activate graphView with empty brain ;)
+            graph.backgroundColor =  graph.isEnabled   ? graphButtonActiveColor : UIColor.lightGray
+            
+            
             switch displayResult {
             case (nil, _, " ",nil) : displayValue = 0
             case (let result, _, _,nil) : displayValue = result
@@ -83,7 +100,7 @@ class ViewController: UIViewController {
             let textCurrentlyInDisplay = display.text!
             let bufferForDisplayedText  = textCurrentlyInDisplay + digit
             let doubleCurrentTotal = calcFormatter.formatterStrToDbl(from:  bufferForDisplayedText)  ?? 0.0
-            display!.text  = calcFormatter.string(from: NSNumber(value: doubleCurrentTotal))
+            display.text  = calcFormatter.string(from: NSNumber(value: doubleCurrentTotal))
             
         } else {
             
@@ -161,6 +178,75 @@ class ViewController: UIViewController {
         brain.setOperand(variable: sender.currentTitle!)
         displayResult = brain.evaluate(using: variables)
         
+    }
+    
+    // MANAGE SLAVE MVC
+    
+    private struct slaveMVC {
+        static let GraphMVC = "GraphMVC"
+    }
+    
+    //GraphMVC
+    
+    private func slaveSegue(to grapView : GraphViewController) {
+        grapView.function = { [weak weakSelf = self] in return weakSelf?.brain.evaluate(using: ["M":$0]).result }
+        grapView.navigationItem.title = displayResult.Description
+        
+    }
+    
+    //The graph button is pushed. Here we are preparing the GraphMVC to show the current function plot
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        guard let identifier = segue.identifier else { return }
+        
+        switch identifier {
+        case slaveMVC.GraphMVC :
+            var destinationViewController = segue.destination
+            // get subView of NavigationController
+            if let navigatonController = destinationViewController as? UINavigationController {
+                destinationViewController = navigatonController.visibleViewController ?? destinationViewController
+            }
+            // try casting subView to GraphViewController and set function & title
+            if let graphVC = destinationViewController as? GraphViewController {
+                slaveSegue(to: graphVC)
+            }
+        //case slaveMVC.someSlaveMVC :
+        default:
+            return
+        }
+    }
+    
+    
+    //Are we ready to show GraphView?
+    
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+        
+        switch identifier {
+        case slaveMVC.GraphMVC : return !brain.evaluate().isPending
+        //case slaveMVC.someSlaveMVC : return... 
+        default:
+            return false
+        }
+        
+    }
+    
+    
+    //To do master is first visible
+    
+    override func awakeFromNib() {
+        self.splitViewController?.delegate = self
+    }
+    
+    private var isFirstStart = true
+    
+    func splitViewController(_ splitViewController: UISplitViewController, collapseSecondary secondaryViewController: UIViewController, onto primaryViewController: UIViewController) -> Bool {
+        
+        if isFirstStart {
+            isFirstStart = false
+            return true
+        }
+        
+        return false
     }
     
 }
