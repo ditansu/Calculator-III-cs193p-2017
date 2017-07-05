@@ -106,8 +106,8 @@
 		029471581EEC336D005BB6BC /* GraphMVC */ = {
 			isa = PBXGroup;
 			children = (
-				0294715D1EEC8E6B005BB6BC /* GraphView.swift */,
 				029471591EEC3488005BB6BC /* GraphViewController.swift */,
+				0294715D1EEC8E6B005BB6BC /* GraphView.swift */,
 				0294715B1EEC349E005BB6BC /* AxesDrawer.swift */,
 			);
 			name = GraphMVC;
@@ -120,6 +120,7 @@
 				02DA728C1EB385350002C741 /* CalculatorTests */,
 				028C884F1EB880D500827E6C /* CalculatorUITests */,
 				02BAFF1D1EA64A360036AC14 /* Products */,
+				02BAFF311EA64B9B0036AC14 /* Supporting Files */,
 			);
 			sourceTree = "<group>";
 		};
@@ -136,9 +137,8 @@
 		02BAFF1E1EA64A360036AC14 /* Calculator */ = {
 			isa = PBXGroup;
 			children = (
-				02BAFF311EA64B9B0036AC14 /* Supporting Files */,
-				029471581EEC336D005BB6BC /* GraphMVC */,
 				029471571EEC332C005BB6BC /* CalcMVC */,
+				029471581EEC336D005BB6BC /* GraphMVC */,
 				02BAFF231EA64A360036AC14 /* Main.storyboard */,
 			);
 			path = Calculator;
@@ -153,6 +153,7 @@
 				02BAFF2B1EA64A360036AC14 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			path = Calculator;
 			sourceTree = "<group>";
 		};
 		02DA728C1EB385350002C741 /* CalculatorTests */ = {

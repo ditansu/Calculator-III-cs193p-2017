@@ -33,7 +33,7 @@ class GraphViewController: UIViewController {
             graphView.addGestureRecognizer(tapRecognizer)
             
             
-            restoreGrapthSettings()
+            //restoreGrapthSettings()
             updateUI()
         }
     
@@ -53,11 +53,10 @@ class GraphViewController: UIViewController {
         
         set {
             calcFunc = newValue
-            graphView?.Function = calcFunc
+            graphView?.graphFunction = calcFunc
         }
 
     }
-    
     
     
     private func updateUI() {
@@ -67,8 +66,8 @@ class GraphViewController: UIViewController {
     
     private func saveGrapthSettings(){
         let  graphSettings = UserDefaults.standard
-        graphSettings.set(graphView?.Origin.x, forKey: "graphOriginX")
-        graphSettings.set(graphView?.Origin.y, forKey: "graphOriginY")
+        graphSettings.set(graphView?.graphOrigin.x, forKey: "graphOriginX")
+        graphSettings.set(graphView?.graphOrigin.y, forKey: "graphOriginY")
         graphSettings.set(graphView?.Scale, forKey: "Scale")
         
     }
@@ -78,11 +77,11 @@ class GraphViewController: UIViewController {
     private func restoreGrapthSettings(){
         let  graphSettings = UserDefaults.standard
         if let graphOriginX = graphSettings.object(forKey: "graphOriginX") {
-            graphView?.Origin.x = (graphOriginX as? CGFloat)!
+            graphView?.graphOrigin.x = (graphOriginX as? CGFloat)!
         }
         
         if let graphOriginY = graphSettings.object(forKey: "graphOriginY") {
-            graphView?.Origin.y = (graphOriginY as? CGFloat)!
+            graphView?.graphOrigin.y = (graphOriginY as? CGFloat)!
         }
         
         if let pointsPerUnit = graphSettings.object(forKey: "Scale") {
@@ -92,6 +91,16 @@ class GraphViewController: UIViewController {
         
     }
     
+    override func viewWillLayoutSubviews() {  // before rotate
+        super.viewWillLayoutSubviews()
+        graphView.setAligmentOrign()
+    }
+    
+    
+    override func viewDidLayoutSubviews() { // after
+        super.viewDidLayoutSubviews()
+        graphView.getAligmentOrign()
+    }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)

@@ -26,28 +26,28 @@ class GraphView: UIView {
     private var baseOrigin = CGPoint.zero
     
     
-    var Bounds : CGRect {
+    var graphBounds : CGRect {
         return bounds //CGRect(x: bounds.minX+5, y: bounds.minY+20, width: bounds.width-10, height: bounds.height-40)
     }
     
-    private var Center : CGPoint {
+    private var graphCenter : CGPoint {
         return convert(center, to: superview)
     }
     
     
-    var Origin : CGPoint  {
+    var graphOrigin : CGPoint  {
         
         get {
             var result = baseOrigin
-            result.x += Center.x
-            result.y += Center.y
+            result.x += graphCenter.x
+            result.y += graphCenter.y
             return result
         }
         
         set {
             var result = newValue
-            result.x -= Center.x
-            result.y -= Center.y
+            result.x -= graphCenter.x
+            result.y -= graphCenter.y
             baseOrigin = result
             self.setNeedsDisplay()
         }
@@ -56,7 +56,7 @@ class GraphView: UIView {
     
     
     //Heart of View
-    var Function : ((Double)->Double?)?  { didSet { self.setNeedsDisplay() }}
+    var graphFunction : ((Double)->Double?)?  { didSet { self.setNeedsDisplay() }}
     
     
     // Axes
@@ -110,11 +110,11 @@ class GraphView: UIView {
         
         axes.contentScaleFactor = self.contentScaleFactor
         axes.color = AxesColor
-        axes.drawAxes(in: Bounds, origin: Origin, pointsPerUnit: Scale)
+        axes.drawAxes(in: graphBounds, origin: graphOrigin, pointsPerUnit: Scale)
         
-        guard let funcGraph = Function else { return }
-        let step = CGFloat(contentScaleFactor/Bounds.width)*10
-        let Graph = getFuncPath(function: funcGraph, use: step, in: Bounds, origin: Origin, scale: Scale)
+        guard let funcGraph = graphFunction else { return }
+        let step = CGFloat(contentScaleFactor/graphBounds.width)*10
+        let Graph = getFuncPath(function: funcGraph, use: step, in: graphBounds, origin: graphOrigin, scale: Scale)
         
         FunctionColor.set()
         Graph.lineWidth = GraphLineWidth
@@ -123,16 +123,34 @@ class GraphView: UIView {
     }
     
 
-//Rotate hanldle 
+//This is grapthOrigin alignment after iDevice rotate
     
     private var tempWidth : CGFloat = 0.0
+    private var alignment = CGPoint.zero
     
-    func viewWillLayout(){
+    var alignedGraphOrign : CGPoint {
+    
+        get {
+            return CGPoint(x: alignment.x * graphBounds.size.width,
+                           y: alignment.y * graphBounds.size.height)
         
+        }
+        set {
+            alignment.x = newValue.x / graphBounds.size.width
+            alignment.y = newValue.y / graphBounds.size.height
+        }
+    
     }
     
-    func viewDidLayout(){
-        
+    func setAligmentOrign(){
+        alignedGraphOrign = graphOrigin
+        tempWidth = graphBounds.size.width
+    }
+    
+    func getAligmentOrign(){
+        //if graphBounds.size.width != tempWidth {
+            graphOrigin = alignedGraphOrign
+        //}
     }
     
     
@@ -155,7 +173,7 @@ class GraphView: UIView {
     func setUserOriginByTAP(byReactionTo tapRecognizer : UITapGestureRecognizer) {
         if tapRecognizer.state == .ended {
             let point = tapRecognizer.location(in: self)
-            Origin = point
+            graphOrigin = point
         }
     }
     
@@ -166,10 +184,10 @@ class GraphView: UIView {
             
         case .changed, .ended:
             let point = panRecognizer.translation(in: self)
-            var newOrigin = Origin
+            var newOrigin = graphOrigin
             newOrigin.x += point.x
             newOrigin.y += point.y
-            Origin = newOrigin
+            graphOrigin = newOrigin
             panRecognizer.setTranslation(CGPoint.zero, in: self)
         default:
             break
