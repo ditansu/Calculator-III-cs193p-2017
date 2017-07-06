@@ -23,7 +23,7 @@ class GraphView: UIView {
     // Activate after TAP gesture
     
     
-    private var baseOrigin = CGPoint.zero
+    
     
     
     var graphBounds : CGRect {
@@ -34,6 +34,7 @@ class GraphView: UIView {
         return convert(center, to: superview)
     }
     
+    private var baseOrigin = CGPoint.zero
     
     var graphOrigin : CGPoint  {
         
@@ -84,7 +85,7 @@ class GraphView: UIView {
             let y = graphFunc(Double(x))!
             
             let point = alignedPoint(point: CGPoint(x: x, y: CGFloat(y)))
-          
+            
             guard abs(point.y) < graphBounds.height*1.5 else {
                 isStartPoint = true
                 continue
@@ -104,7 +105,7 @@ class GraphView: UIView {
         return funcPath
     }
     
-
+    
     
     override func draw(_ rect: CGRect) {
         
@@ -122,39 +123,51 @@ class GraphView: UIView {
         
     }
     
-
-//This is grapthOrigin alignment after iDevice rotate
     
-    private var tempWidth : CGFloat = 0.0
+    //This is grapthOrigin alignment after iDevice rotate
+    
+    private var tempWidth : CGFloat?
     private var alignment = CGPoint.zero
     
-    var alignedGraphOrign : CGPoint {
-    
-        get {
-            return CGPoint(x: alignment.x * graphBounds.size.width,
-                           y: alignment.y * graphBounds.size.height)
+    var alignedGraphOrigin : CGPoint {
         
+        get {
+            return CGPoint(x: alignment.x * bounds.size.width,
+                           y: alignment.y * bounds.size.height)
+            
         }
         set {
-            alignment.x = newValue.x / graphBounds.size.width
-            alignment.y = newValue.y / graphBounds.size.height
+            alignment.x = newValue.x / bounds.size.width
+            alignment.y = newValue.y / bounds.size.height
         }
-    
+        
     }
     
-    func setAligmentOrign(){
-        alignedGraphOrign = graphOrigin
-        tempWidth = graphBounds.size.width
-    }
-    
-    func getAligmentOrign(){
-        //if graphBounds.size.width != tempWidth {
-            graphOrigin = alignedGraphOrign
+    func setAligmentOrigin(){
+        print("SET DEB1 OldWidth: \(tempWidth ?? 0.0) ||  NewWidth: \(bounds.size.width) ")
+        print("SET DEB1 before AlignedOrigin: \(alignedGraphOrigin) || Origin: \(graphOrigin) || aligement: \(alignment) ")
+       //if bounds.size.width != tempWidth {
+            alignedGraphOrigin = graphOrigin
+        
+        //}
+        print("SET DEB1 after AlignedOrigin: \(alignedGraphOrigin) || Origin: \(graphOrigin) || aligement: \(alignment) ")
+        print("---------DEB1")
         //}
     }
     
+    func getAligmentOrigin(){
+        print("     GET DEB1 OldWidth: \(tempWidth ?? 0.0) ||  NewWidth: \(bounds.size.width) ")
+        print("     GET DEB1 before AlignedOrigin: \(alignedGraphOrigin) || Origin: \(graphOrigin) || aligement: \(alignment)")
+        if bounds.size.width != tempWidth {
+            graphOrigin = alignedGraphOrigin
+            tempWidth = bounds.size.width
+        }
+        print("     GET DEB1 after AlignedOrigin: \(alignedGraphOrigin) || Origin: \(graphOrigin) || aligement: \(alignment) ")
+        print("---------DEB1")
+    }
     
-// Gestures handlers
+    
+    // Gestures handlers
     
     
     func changeScale(byReactionTo pinchRecognizer: UIPinchGestureRecognizer) {

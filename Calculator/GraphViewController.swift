@@ -93,13 +93,14 @@ class GraphViewController: UIViewController {
     
     override func viewWillLayoutSubviews() {  // before rotate
         super.viewWillLayoutSubviews()
-        graphView.setAligmentOrign()
+        graphView.setAligmentOrigin()
+        
     }
     
     
     override func viewDidLayoutSubviews() { // after
         super.viewDidLayoutSubviews()
-        graphView.getAligmentOrign()
+        graphView.getAligmentOrigin()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
