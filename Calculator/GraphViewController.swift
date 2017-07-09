@@ -33,20 +33,17 @@ class GraphViewController: UIViewController {
             graphView.addGestureRecognizer(tapRecognizer)
             
             
-            //restoreGrapthSettings()
+            restoreGraphSettings()
             updateUI()
         }
     
         
     }
     
-    
     private var calcFunc : ((Double)->Double?)? //= {$0*sin($0)}
 
-    
     var function : ((Double)->Double?)?
     {
-       
         get {
             return calcFunc
         }
@@ -58,54 +55,60 @@ class GraphViewController: UIViewController {
 
     }
     
-    
     private func updateUI() {
        function = calcFunc
     }
     
     
-    private func saveGrapthSettings(){
-        let  graphSettings = UserDefaults.standard
-        graphSettings.set(graphView?.graphOrigin.x, forKey: "graphOriginX")
-        graphSettings.set(graphView?.graphOrigin.y, forKey: "graphOriginY")
-        graphSettings.set(graphView?.Scale, forKey: "Scale")
-        
+    
+    private struct udKeys {
+        static let Scale = "GraphView.Scale"
+        static let OriginX = "GraphView.Origin.X"
+        static let OriginY = "GraphView.Origin.Y"
     }
     
+    private let ud = UserDefaults.standard
     
-    
-    private func restoreGrapthSettings(){
-        let  graphSettings = UserDefaults.standard
-        if let graphOriginX = graphSettings.object(forKey: "graphOriginX") {
-            graphView?.graphOrigin.x = (graphOriginX as? CGFloat)!
+    private func saveGraphSettings(){
+        let  graphOrigin = graphView!.alignment
+        ud.set(graphOrigin.x, forKey: udKeys.OriginX)
+        ud.set(graphOrigin.y, forKey: udKeys.OriginY)
+        ud.set(graphView?.Scale, forKey: udKeys.Scale)
+    }
+
+    private func restoreGraphSettings(){
+        var  graphOrigin = CGPoint.zero
+        if let graphOriginX = ud.object(forKey: udKeys.OriginX) {
+            graphOrigin.x = (graphOriginX as? CGFloat)!
         }
         
-        if let graphOriginY = graphSettings.object(forKey: "graphOriginY") {
-            graphView?.graphOrigin.y = (graphOriginY as? CGFloat)!
+        if let graphOriginY = ud.object(forKey: udKeys.OriginY) {
+            graphOrigin.y = (graphOriginY as? CGFloat)!
         }
         
-        if let pointsPerUnit = graphSettings.object(forKey: "Scale") {
-            graphView?.Scale = (pointsPerUnit as? CGFloat)!
+        graphView?.alignment = graphOrigin
+        
+        if let Scale = ud.object(forKey: udKeys.Scale) {
+            graphView?.Scale = (Scale as? CGFloat)!
         }
-        
-        
     }
     
     override func viewWillLayoutSubviews() {  // before rotate
         super.viewWillLayoutSubviews()
-        graphView.setAligmentOrigin()
-        
+        graphView.originAlignment()
     }
     
-    
-    override func viewDidLayoutSubviews() { // after
-        super.viewDidLayoutSubviews()
-        graphView.getAligmentOrigin()
-    }
+// MARK: not need because  viewWillLayoutSubviews called twice (sic!) for one rotate: before & after rotate I don't know how 
+//    override func viewDidLayoutSubviews() { // after
+//        super.viewDidLayoutSubviews()
+//        graphView.originAlignment()
+//        print("viewDidLayoutSubviews called!!")
+//    }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        saveGrapthSettings()
+        //graphView.originAlignment() // call for user reset origin without rotation
+        saveGraphSettings()
     }
     
     

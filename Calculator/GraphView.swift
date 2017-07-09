@@ -75,7 +75,7 @@ class GraphView: UIView {
         let funcPath = UIBezierPath()
         var x = -graphOrigin.x
         var isStartPoint = true
-        //var iter = Int(0)
+        var iter = Int(0)
         
         while x <= graphBounds.width {
             
@@ -90,7 +90,7 @@ class GraphView: UIView {
                 continue
             }
             
-            //iter += 1
+            iter += 1
             
             if isStartPoint {
                 funcPath.move(to: point)
@@ -100,7 +100,7 @@ class GraphView: UIView {
             }
         }
         
-        //print("Debug Iter count: \(iter)")
+        print("Debug Iter count: \(iter)")
         return funcPath
     }
     
@@ -113,7 +113,7 @@ class GraphView: UIView {
         axes.drawAxes(in: graphBounds, origin: graphOrigin, pointsPerUnit: Scale)
         
         guard let funcGraph = graphFunction else { return }
-        let step = CGFloat(contentScaleFactor/graphBounds.width)*10
+        let step = CGFloat(contentScaleFactor/graphBounds.width)
         let Graph = getFuncPath(function: funcGraph, use: step, in: graphBounds, origin: graphOrigin, scale: Scale)
         
         FunctionColor.set()
@@ -125,10 +125,10 @@ class GraphView: UIView {
     
     //This is grapthOrigin alignment after iDevice rotate
     
-    private var tempWidth : CGFloat = 0.0
-    private var alignment = CGPoint.zero
+    private var oldWidth : CGFloat = 0.0
+    var alignment = CGPoint.zero
     
-    var alignedGraphOrigin : CGPoint {
+    private var alignedGraphOrigin : CGPoint {
         
         get {
             return CGPoint(x: alignment.x * bounds.size.width,
@@ -141,75 +141,121 @@ class GraphView: UIView {
         
     }
     
-    func setAligmentOrigin(){
-        print("SET DEB1 OldWidth: \(tempWidth) ||  NewWidth: \(bounds.size.width) || bounds: \(bounds) ")
-        print("SET DEB1 before AlignedOrigin: \(alignedGraphOrigin) || Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin) || aligement: \(alignment) ")
-       if bounds.size.width == tempWidth  {
+    func originAlignment(){
+        // "viewWillLayoutSubviews" called twice for the one device rotate!!!
+        if bounds.size.width == oldWidth  {
             alignedGraphOrigin = baseOrigin
-            tempWidth = bounds.size.width
-       }
-        print("SET DEB1 after AlignedOrigin: \(alignedGraphOrigin) ||  Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin)  || aligement: \(alignment) ")
-        print("---------DEB1")
-    }
-    
-    func getAligmentOrigin(){
-        print("     GET DEB1 OldWidth: \(tempWidth) ||  NewWidth: \(bounds.size.width) || bounds: \(bounds) ")
-        print("     GET DEB1 before AlignedOrigin: \(alignedGraphOrigin) || Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin)  || aligement: \(alignment)")
-        
-        if bounds.size.width != tempWidth {
+        } else {
             baseOrigin = alignedGraphOrigin
-            tempWidth = bounds.size.width
         }
-        print("     GET DEB1 after AlignedOrigin: \(alignedGraphOrigin) || Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin)  || aligement: \(alignment) ")
-        print("---------DEB1")
+        oldWidth = bounds.size.width
     }
     
     
     // Gestures handlers
     
+    func setUserOriginByTAP(byReactionTo tapRecognizer : UITapGestureRecognizer) {
+        if tapRecognizer.state == .ended {
+            graphOrigin = tapRecognizer.location(in: self)
+            self.originAlignment()
+        }
+    }
+    
+    
+//    func changeScale(byReactionTo pinchRecognizer: UIPinchGestureRecognizer) {
+//        
+//        switch pinchRecognizer.state {
+//            
+//        case .changed, .ended:
+//            Scale *= pinchRecognizer.scale
+//            pinchRecognizer.scale = 1.0
+//        default:
+//            break
+//        }
+//        
+//    }
+    
+    
+    private var snapshort : UIView?
     
     func changeScale(byReactionTo pinchRecognizer: UIPinchGestureRecognizer) {
-        
         switch pinchRecognizer.state {
+        case .began:
+            snapshort = self.snapshotView(afterScreenUpdates: false)
+            snapshort!.alpha = 0.8
+            self.addSubview(snapshort!)
+        case .changed:
             
-        case .changed, .ended:
-            Scale *= pinchRecognizer.scale
-            pinchRecognizer.scale = 1
+            let touch = CGPoint(x: graphCenter.x + baseOrigin.x,
+                                y: graphCenter.y + baseOrigin.y)
+           
+            snapshort!.frame.size.height *= pinchRecognizer.scale
+            snapshort!.frame.size.width *= pinchRecognizer.scale
+            snapshort!.frame.origin.x = snapshort!.frame.origin.x * pinchRecognizer.scale + (1 - pinchRecognizer.scale)*touch.x
+            snapshort!.frame.origin.y = snapshort!.frame.origin.y * pinchRecognizer.scale + (1 - pinchRecognizer.scale)*touch.y
+            pinchRecognizer.scale = 1.0
+        case .ended:
+            let changedScale = snapshort!.frame.height / self.frame.height
+            Scale *= changedScale
+            snapshort!.removeFromSuperview()
+            snapshort = nil
+            self.setNeedsDisplay()
         default:
             break
         }
         
     }
     
-    func setUserOriginByTAP(byReactionTo tapRecognizer : UITapGestureRecognizer) {
-        if tapRecognizer.state == .ended {
-            let point = tapRecognizer.location(in: self)
-           
-            print("TAP DEB1 before AlignedOrigin: \(alignedGraphOrigin) || Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin) || aligement: \(alignment) ")
-            graphOrigin = point
-            print("TAP DEB1 after AlignedOrigin: \(alignedGraphOrigin) ||  Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin)  || aligement: \(alignment) ")
-            print("---------TAP DEB1")
-
-        }
-    }
     
+//    func moveGraphByPanning(byReactionTo panRecognizer : UIPanGestureRecognizer) {
+//        
+//        switch panRecognizer.state {
+//            
+//        case .changed, .ended:
+//            let point = panRecognizer.translation(in: self)
+//            var newOrigin = graphOrigin
+//            newOrigin.x += point.x
+//            newOrigin.y += point.y
+//            graphOrigin = newOrigin
+//            self.originAlignment()
+//            panRecognizer.setTranslation(CGPoint.zero, in: self)
+//        default:
+//            break
+//        }
+//    }
     
     func moveGraphByPanning(byReactionTo panRecognizer : UIPanGestureRecognizer) {
         
         switch panRecognizer.state {
             
-        case .changed, .ended:
+        case .began:
+            snapshort = self.snapshotView(afterScreenUpdates: false)
+            snapshort!.alpha = 0.6
+            self.addSubview(snapshort!)
+        case .changed:
             let point = panRecognizer.translation(in: self)
-            var newOrigin = graphOrigin
-            newOrigin.x += point.x
-            newOrigin.y += point.y
-            graphOrigin = newOrigin
-            panRecognizer.setTranslation(CGPoint.zero, in: self)
+            
+            if point != CGPoint.zero {
+                snapshort!.center.x += point.x
+                snapshort!.center.y += point.y
+                panRecognizer.setTranslation(CGPoint.zero, in: self)
+            }
+            
+        case .ended:
+            
+            graphOrigin.x += snapshort!.frame.origin.x
+            graphOrigin.y += snapshort!.frame.origin.y
+            self.originAlignment()
+            
+            snapshort!.removeFromSuperview()
+            snapshort = nil
+            self.setNeedsDisplay()
+            
         default:
             break
         }
     }
-    
+
     
     
     
