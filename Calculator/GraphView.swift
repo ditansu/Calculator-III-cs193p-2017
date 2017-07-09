@@ -34,7 +34,7 @@ class GraphView: UIView {
         return convert(center, to: superview)
     }
     
-    private var baseOrigin = CGPoint.zero
+    private var baseOrigin = CGPoint.zero { didSet { self.setNeedsDisplay() }}
     
     var graphOrigin : CGPoint  {
         
@@ -50,7 +50,6 @@ class GraphView: UIView {
             result.x -= graphCenter.x
             result.y -= graphCenter.y
             baseOrigin = result
-            self.setNeedsDisplay()
         }
         
     }
@@ -126,7 +125,7 @@ class GraphView: UIView {
     
     //This is grapthOrigin alignment after iDevice rotate
     
-    private var tempWidth : CGFloat?
+    private var tempWidth : CGFloat = 0.0
     private var alignment = CGPoint.zero
     
     var alignedGraphOrigin : CGPoint {
@@ -134,7 +133,6 @@ class GraphView: UIView {
         get {
             return CGPoint(x: alignment.x * bounds.size.width,
                            y: alignment.y * bounds.size.height)
-            
         }
         set {
             alignment.x = newValue.x / bounds.size.width
@@ -144,25 +142,25 @@ class GraphView: UIView {
     }
     
     func setAligmentOrigin(){
-        print("SET DEB1 OldWidth: \(tempWidth ?? 0.0) ||  NewWidth: \(bounds.size.width) ")
-        print("SET DEB1 before AlignedOrigin: \(alignedGraphOrigin) || Origin: \(graphOrigin) || aligement: \(alignment) ")
-       //if bounds.size.width != tempWidth {
-            alignedGraphOrigin = graphOrigin
-        
-        //}
-        print("SET DEB1 after AlignedOrigin: \(alignedGraphOrigin) || Origin: \(graphOrigin) || aligement: \(alignment) ")
+        print("SET DEB1 OldWidth: \(tempWidth) ||  NewWidth: \(bounds.size.width) || bounds: \(bounds) ")
+        print("SET DEB1 before AlignedOrigin: \(alignedGraphOrigin) || Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin) || aligement: \(alignment) ")
+       if bounds.size.width == tempWidth  {
+            alignedGraphOrigin = baseOrigin
+            tempWidth = bounds.size.width
+       }
+        print("SET DEB1 after AlignedOrigin: \(alignedGraphOrigin) ||  Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin)  || aligement: \(alignment) ")
         print("---------DEB1")
-        //}
     }
     
     func getAligmentOrigin(){
-        print("     GET DEB1 OldWidth: \(tempWidth ?? 0.0) ||  NewWidth: \(bounds.size.width) ")
-        print("     GET DEB1 before AlignedOrigin: \(alignedGraphOrigin) || Origin: \(graphOrigin) || aligement: \(alignment)")
+        print("     GET DEB1 OldWidth: \(tempWidth) ||  NewWidth: \(bounds.size.width) || bounds: \(bounds) ")
+        print("     GET DEB1 before AlignedOrigin: \(alignedGraphOrigin) || Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin)  || aligement: \(alignment)")
+        
         if bounds.size.width != tempWidth {
-            graphOrigin = alignedGraphOrigin
+            baseOrigin = alignedGraphOrigin
             tempWidth = bounds.size.width
         }
-        print("     GET DEB1 after AlignedOrigin: \(alignedGraphOrigin) || Origin: \(graphOrigin) || aligement: \(alignment) ")
+        print("     GET DEB1 after AlignedOrigin: \(alignedGraphOrigin) || Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin)  || aligement: \(alignment) ")
         print("---------DEB1")
     }
     
@@ -186,7 +184,12 @@ class GraphView: UIView {
     func setUserOriginByTAP(byReactionTo tapRecognizer : UITapGestureRecognizer) {
         if tapRecognizer.state == .ended {
             let point = tapRecognizer.location(in: self)
+           
+            print("TAP DEB1 before AlignedOrigin: \(alignedGraphOrigin) || Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin) || aligement: \(alignment) ")
             graphOrigin = point
+            print("TAP DEB1 after AlignedOrigin: \(alignedGraphOrigin) ||  Base Origin: \(baseOrigin), Graph Origin: \(graphOrigin)  || aligement: \(alignment) ")
+            print("---------TAP DEB1")
+
         }
     }
     
