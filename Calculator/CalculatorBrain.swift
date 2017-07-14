@@ -11,7 +11,7 @@ import Foundation
 struct CalculatorBrain {
     
     
-    // Calculator operations including function/constants, description (if need), guard check (if need) + error message
+    // Calculator operations including function/constants, description (if need), guard check (if need) + error message and operation priority
     
     enum Operation {
         case constant(Double)
@@ -49,13 +49,13 @@ struct CalculatorBrain {
     
     // The Calculator  "programing"
     
-    private enum OpStack {
+    fileprivate enum OpStack {
         case operand (Double)
         case operation (String)
         case variable (String)
     }
     
-    private var internalProgram = [OpStack] ()
+    fileprivate var internalProgram = [OpStack] ()
     
     mutating func setOperand(variable named: String){
         internalProgram.append(OpStack.variable(named))
@@ -193,7 +193,7 @@ struct CalculatorBrain {
                         cache.accumulator = function(cache.accumulator!)
                         
                         if descFunction == nil {
-                            descFunction = {symbol + "(" + $0 + ")"} //standart description
+                            descFunction = {symbol + "(" + $0 + ")"} //if special description is absent we are use standart description
                         }
                         
                         cache.descriptionAccumulator = descFunction!(cache.descriptionAccumulator!)
@@ -208,7 +208,7 @@ struct CalculatorBrain {
                     
                     if cache.accumulator != nil {
                         if descFunction == nil {
-                            descFunction = {$0 + " " + symbol + " " + $1} //standart description
+                            descFunction = {$0 + " " + symbol + " " + $1} //if special description is absent we are use standart description
                         }
                         pendingBinaryOperation = PendingBinaryOperation(function: function,
                                                                         firstOperand: cache.accumulator!,
@@ -278,7 +278,57 @@ struct CalculatorBrain {
     
 } //STRUCTURE END
 
-//calculate factorial function
+
+// For save CalculatorBrain state by UserDefaults
+
+typealias PropertyList = AnyObject
+
+extension CalculatorBrain {
+    
+    var program: PropertyList {
+        
+        get {
+            var propertyListProgram = [Any]()
+            for op in self.internalProgram {
+                switch op {
+                case .operand(let operand):
+                    propertyListProgram.append(operand as Any)
+                case .operation(let operation):
+                    propertyListProgram.append(operation as Any)
+                case .variable(let variable):
+                    propertyListProgram.append(variable as Any)
+                }
+            }
+            return propertyListProgram as PropertyList
+        }
+        
+        set {
+            self.clear()
+            guard let arrayOfAny = newValue as? [Any] else {return}
+            for op in arrayOfAny {
+                if let operand = op as? Double {
+                    self.internalProgram.append(OpStack.operand(operand))
+                } else if let symbol = op as? String {
+                    if self.operations[symbol] != nil {
+                        //the symbol is an operation
+                        self.internalProgram.append(OpStack.operation(symbol))
+                    } else {
+                        //else symbol is a variable
+                        self.internalProgram.append(OpStack.variable(symbol))
+                    }
+                }
+            
+            }
+        }
+    
+    }
+
+
+}
+
+
+
+//calculate factorial
 func factorialCalc(digit : Double) -> Double {
     var n = Int(digit)
     var result = 1

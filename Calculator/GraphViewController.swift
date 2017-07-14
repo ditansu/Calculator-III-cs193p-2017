@@ -25,7 +25,6 @@ class GraphViewController: UIViewController {
             let panRecognizer = UIPanGestureRecognizer(target: graphView, action: panHandler)
             graphView.addGestureRecognizer(panRecognizer)
             
-            
             // Tap - set origin
             let tapHandler = #selector(graphView.setUserOriginByTAP(byReactionTo:))
             let tapRecognizer = UITapGestureRecognizer(target: graphView, action: tapHandler)
@@ -36,7 +35,6 @@ class GraphViewController: UIViewController {
             restoreGraphSettings()
             updateUI()
         }
-    
         
     }
     
@@ -60,7 +58,6 @@ class GraphViewController: UIViewController {
     }
     
     
-    
     private struct udKeys {
         static let Scale = "GraphView.Scale"
         static let OriginX = "GraphView.Origin.X"
@@ -79,35 +76,33 @@ class GraphViewController: UIViewController {
     private func restoreGraphSettings(){
         var  graphOrigin = CGPoint.zero
         if let graphOriginX = ud.object(forKey: udKeys.OriginX) {
-            graphOrigin.x = (graphOriginX as? CGFloat)!
+            graphOrigin.x = graphOriginX as? CGFloat ?? 0.0
         }
         
         if let graphOriginY = ud.object(forKey: udKeys.OriginY) {
-            graphOrigin.y = (graphOriginY as? CGFloat)!
+            graphOrigin.y = graphOriginY as? CGFloat ?? 0.0
         }
         
         graphView?.alignment = graphOrigin
         
         if let Scale = ud.object(forKey: udKeys.Scale) {
-            graphView?.Scale = (Scale as? CGFloat)!
+            graphView?.Scale = Scale as? CGFloat ?? 100
         }
     }
     
-    override func viewWillLayoutSubviews() {  // before rotate
+    //MARK: -- Pleas pay atention. If you have Navigation Controller that method will be called > 1 times BEFORE call viewDidLayoutSubviews !!
+    override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         graphView.originAlignment()
     }
     
-// MARK: not need because  viewWillLayoutSubviews called twice (sic!) for one rotate: before & after rotate I don't know how 
-//    override func viewDidLayoutSubviews() { // after
-//        super.viewDidLayoutSubviews()
-//        graphView.originAlignment()
-//        print("viewDidLayoutSubviews called!!")
-//    }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        graphView.originAlignment()
+    }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        //graphView.originAlignment() // call for user reset origin without rotation
         saveGraphSettings()
     }
     

@@ -35,12 +35,43 @@ class CalculatorViewController: UIViewController, UISplitViewControllerDelegate 
     
     var userIsInTheMiddleOfTyping = false
     
-    //MODEL {
+    //MARK: MODEL {
     
     private var brain = CalculatorBrain()
     private var variables = [String:Double]()
+   
+    // }
+    
+    //MARK: Load\Restore MVC state by UserDefaults  {
+   
+    private let ud = UserDefaults.standard
+    private struct Keys {
+        static let Program = "CalcMVC.Program"
+        //
+    }
+    
+    private var program: PropertyList? {
+        get { return ud.object(forKey: Keys.Program) as PropertyList? }
+        set { ud.set(newValue, forKey: Keys.Program) }
+    }
+
+    private func saveState() -> Bool {
+        guard !brain.evaluate(using: variables).isPending else {return false}
+        program = brain.program
+        return true
+    }
+    
+    private func loadState() -> Bool {
+        guard let savedProgram = program as? [Any] else {return false}
+        brain.program = savedProgram as PropertyList
+        displayResult = brain.evaluate(using: variables)
+        return true
+    }
     
     // }
+    
+    
+    
     
     private let decimalSeparator = calcFormatter.decimalSeparator ?? "."
     
@@ -180,7 +211,37 @@ class CalculatorViewController: UIViewController, UISplitViewControllerDelegate 
         
     }
     
-    // MANAGE SLAVE MVC
+    //MARK: -- Life Cycle
+    
+    override func awakeFromNib() {
+        self.splitViewController?.delegate = self
+    }
+
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        if loadState() {
+            if  let graphVC = splitViewController?.viewControllers.last?.contentViewController as? GraphViewController {
+                prepareGraphVC(to: graphVC)
+            }
+        }
+        
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if saveState() {
+            print("debug save ok")
+        } else {
+            print("debug don't save :(")
+        }
+        
+    }
+    
+    
+    
+    //MARK: MANAGE SLAVE MVC
     
     private struct slaveMVC {
         static let GraphMVC = "GraphMVC"
@@ -188,7 +249,7 @@ class CalculatorViewController: UIViewController, UISplitViewControllerDelegate 
     
     //GraphMVC
     
-    private func slaveSegue(to grapView : GraphViewController) {
+    private func prepareGraphVC(to grapView : GraphViewController) {
         grapView.function = { [weak weakSelf = self] in return weakSelf?.brain.evaluate(using: ["M":$0]).result }
         grapView.navigationItem.title = displayResult.Description
         
@@ -208,7 +269,7 @@ class CalculatorViewController: UIViewController, UISplitViewControllerDelegate 
             }
             // try casting subView to GraphViewController and set function & title
             if let graphVC = destinationViewController as? GraphViewController {
-                slaveSegue(to: graphVC)
+                prepareGraphVC(to: graphVC)
             }
         //case slaveMVC.someSlaveMVC :
         default:
@@ -231,11 +292,8 @@ class CalculatorViewController: UIViewController, UISplitViewControllerDelegate 
     }
     
     
-    //To do master is first visible
+    //To doing master is a first visible view 
     
-    override func awakeFromNib() {
-        self.splitViewController?.delegate = self
-    }
     
     private var isFirstStart = true
     
@@ -251,6 +309,15 @@ class CalculatorViewController: UIViewController, UISplitViewControllerDelegate 
     
 }
 
-
+extension UIViewController {
+    var contentViewController: UIViewController {
+        if let navcon = self as? UINavigationController {
+            return navcon.visibleViewController ?? self
+        } else {
+            return self
+        }
+        
+    }
+}
 
 

@@ -20,12 +20,6 @@ class GraphView: UIView {
     
     // Bounds & origin
     
-    // Activate after TAP gesture
-    
-    
-    
-    
-    
     var graphBounds : CGRect {
         return bounds //CGRect(x: bounds.minX+5, y: bounds.minY+20, width: bounds.width-10, height: bounds.height-40)
     }
@@ -54,7 +48,6 @@ class GraphView: UIView {
         
     }
     
-    
     //Heart of View
     var graphFunction : ((Double)->Double?)?  { didSet { self.setNeedsDisplay() }}
     
@@ -71,11 +64,9 @@ class GraphView: UIView {
             return  CGPoint(x: graphOrigin.x + point.x * graphScale,  y: graphOrigin.y - point.y * graphScale)
         }
         
-        
         let funcPath = UIBezierPath()
         var x = -graphOrigin.x
         var isStartPoint = true
-        var iter = Int(0)
         
         while x <= graphBounds.width {
             
@@ -90,8 +81,6 @@ class GraphView: UIView {
                 continue
             }
             
-            iter += 1
-            
             if isStartPoint {
                 funcPath.move(to: point)
                 isStartPoint = false
@@ -100,7 +89,6 @@ class GraphView: UIView {
             }
         }
         
-        print("Debug Iter count: \(iter)")
         return funcPath
     }
     
@@ -113,6 +101,7 @@ class GraphView: UIView {
         axes.drawAxes(in: graphBounds, origin: graphOrigin, pointsPerUnit: Scale)
         
         guard let funcGraph = graphFunction else { return }
+        
         let step = CGFloat(contentScaleFactor/graphBounds.width)
         let Graph = getFuncPath(function: funcGraph, use: step, in: graphBounds, origin: graphOrigin, scale: Scale)
         
@@ -141,12 +130,12 @@ class GraphView: UIView {
         
     }
     
+    // call from viewWill\DidLayoutSubviews
     func originAlignment(){
-        // "viewWillLayoutSubviews" called twice for the one device rotate!!!
         if bounds.size.width == oldWidth  {
-            alignedGraphOrigin = baseOrigin
+            alignedGraphOrigin = baseOrigin // save proportion before rotate
         } else {
-            baseOrigin = alignedGraphOrigin
+            baseOrigin = alignedGraphOrigin // to align origin after rotate by saved propoptional
         }
         oldWidth = bounds.size.width
     }
