@@ -25,7 +25,7 @@ class GraphView: UIView {
     }
     
     private var graphCenter : CGPoint {
-        return convert(center, to: superview)
+        return CGPoint(x: bounds.midX, y: bounds.midY)
     }
     
     private var baseOrigin = CGPoint.zero { didSet { self.setNeedsDisplay() }}
@@ -94,6 +94,7 @@ class GraphView: UIView {
     
     
     
+    
     override func draw(_ rect: CGRect) {
         
         axes.contentScaleFactor = self.contentScaleFactor
@@ -132,6 +133,7 @@ class GraphView: UIView {
     
     // call from viewWill\DidLayoutSubviews
     func originAlignment(){
+        
         if bounds.size.width == oldWidth  {
             alignedGraphOrigin = baseOrigin // save proportion before rotate
         } else {

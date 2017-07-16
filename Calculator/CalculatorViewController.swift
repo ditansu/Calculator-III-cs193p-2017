@@ -232,13 +232,12 @@ class CalculatorViewController: UIViewController, UISplitViewControllerDelegate 
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         if saveState() {
-            print("debug save ok")
+         //   print("debug save ok")
         } else {
-            print("debug don't save :(")
+         //   print("debug don't save :(")
         }
         
     }
-    
     
     
     //MARK: MANAGE SLAVE MVC
@@ -307,6 +306,26 @@ class CalculatorViewController: UIViewController, UISplitViewControllerDelegate 
         return false
     }
     
+    // Lecture 12
+    
+    private func showSizeClasses(){
+//        if !userIsInTheMiddleOfTyping {
+//            display.textAlignment = .center
+//            display.text = "width: " + traitCollection.horizontalSizeClass.description + " height: " + traitCollection.verticalSizeClass.description
+//        }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        showSizeClasses()
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+        
+        coordinator.animate(alongsideTransition: { (coordinator) in self.showSizeClasses()}, completion: nil)
+    }
+    
 }
 
 extension UIViewController {
@@ -319,5 +338,23 @@ extension UIViewController {
         
     }
 }
+
+extension UIUserInterfaceSizeClass {
+    public var description: String {
+        switch self {
+        case .compact:
+            return "Compact"
+        case .regular:
+            return "Regular"
+        case .unspecified:
+            return "??"
+        
+        }
+    }
+}
+
+
+
+
 
 
